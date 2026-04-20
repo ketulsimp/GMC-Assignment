@@ -1,0 +1,42 @@
+<html>
+<head>
+    <style>
+        .google-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: white;
+            color: #444;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 500;
+            text-decoration: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: background-color 0.3s;
+        }
+
+        .google-btn:hover {
+            background-color: #f7f7f7;
+        }
+
+        .google-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Login</h2>
+
+    <a href="/auth/google/login" class="google-btn">
+        <img class="google-icon" 
+        src="https://developers.google.com/identity/images/g-logo.png" 
+        alt="Google logo">
+        Sign in with Google
+    </a>
+
+</body>
+</html>
