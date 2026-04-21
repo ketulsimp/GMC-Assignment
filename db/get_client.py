@@ -1,4 +1,4 @@
-from pymongo import MongoClient
+from pymongo import AsyncMongoClient
 
-client = MongoClient('mongodb://localhost:27017/')
+client = AsyncMongoClient('mongodb://localhost:27017/')
 db = client['merchant']

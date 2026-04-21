@@ -2,120 +2,109 @@ from fastapi import APIRouter, Request, Cookie
 from fastapi.responses import RedirectResponse
 from typing import Annotated
 from fastapi.templating import Jinja2Templates
-from db.get_client import client
 from dotenv import load_dotenv
+from db.users import insert_google_acc_to_db, insert_token_to_db, insert_user_to_db
+from utils.oauth import oauth
+from schemas.auth import User, Google_Accounts, OAuthToken
+from datetime import datetime, timedelta
+import requests
 import os
+from utils.logger import logger
 
 load_dotenv()
-
-import google.oauth2.credentials
-import google_auth_oauthlib.flow as oauth_flow
 
 
 templates = Jinja2Templates(directory='templates')
 
-scopes = ["https://www.googleapis.com/auth/content", "https://www.googleapis.com/auth/userinfo.profile","https://www.googleapis.com/auth/userinfo.email", "openid"]
-
 auth = APIRouter(prefix='/api/auth')
 
-REDIRECT_URI = 'http://localhost:8000/api/auth/callback'
 
 @auth.get('/login')
 def login(request: Request):
+    
+    logger.info('Started User Login')
 
     return templates.TemplateResponse(
-        request=request, name='login.html',context={"id":os.getenv('CLIENT_ID')}
+        request=request, name='login.html'
     )
 
 
 
-@auth.get('/authorize')
-async def authorize(response: RedirectResponse):
 
 
-    flow = oauth_flow.Flow.from_client_secrets_file('client_secret.json',scopes=scopes,code_verifier='asbkasjdfbksjbdsjdbskdbsdjbsdkjbsdbsjdbsjbfljsjhsdfkjad')
-
+@auth.get('/google/login')
+async def authorize(request: Request):
     try:
-
-        flow.redirect_uri = REDIRECT_URI
-
-        auth_url, state = flow.authorization_url(access_type='offline',include_granted_scopes='true')
-        print("Auth URL ",auth_url," state ",state)
-        
-
-
-        return RedirectResponse(auth_url)
+        logger.info('Started Google Login')        
+        return await oauth.google.authorize_redirect(request, redirect_uri=os.environ['REDIRECT_URL'],access_type="offline",prompt="consent")
 
     except Exception as e:
-        print(e)
+        import traceback
+        print("Error:", traceback.format_exc())  # Debugging step
+
+        logger.warning(str(e))
+
+        return {"error": str(e)}
+
+    
 
 
 
-@auth.get('/callback')
-async def callback(request:Request, state: str|None =None, code: str|None =None):
+@auth.get('/google/callback')
+async def callback(request:Request,state: str|None = None , code: str|None =None, error: str|None = None):
     try:
-
-
-        flow = oauth_flow.Flow.from_client_secrets_file('client_secret.json',scopes=scopes,state=state,code_verifier='asbkasjdfbksjbdsjdbskdbsdjbsdkjbsdbsjdbsjbfljsjhsdfkjad')
-
-
-        flow.redirect_uri = REDIRECT_URI
-
-        print(flow.client_config)
-        temp_var = str(request.url)
-        if "http:" in temp_var:
-            temp_var = "https:" + temp_var[5:]
+        print('callback called')
         
-        auth_res = temp_var
+        if error:
+            return templates.TemplateResponse(
+        request=request, name='error.html',context={'msg':str(error)}
+    )
 
-        auth_res = str(auth_res)
+        logger.info('Code Recevied Starting Acesssing token')
 
-        auth_res = auth_res+"&grant_type='authorization_code'"
+        token = await oauth.google.authorize_access_token(request)
+  
+        logger.info('Token Recevied Starting Parsing Token for user')
 
-
-        flow.fetch_token(authorization_response=auth_res)
-
-        print(flow)
-
-
-        credentials = flow.credentials
-
-        cred_dict = credentials_to_dict(credentials=credentials) 
+        user = await oauth.google.parse_id_token(request, token)
         
-        print(cred_dict)
+        logger.info('User parsed. Starting DB Ops')
+
+        print(token)
+
+        res = await insert_user_to_db(User(email=user.email,name=user.name))
+        print(res)
+
+        res1 = await insert_google_acc_to_db(Google_Accounts(email=user.email,name=user.name,picture=user.picture))
+
+        exp = datetime.now() + timedelta(seconds = token.get('expires_in'))
+        print(res1)
 
 
+        res3 = await insert_token_to_db(OAuthToken(access_token=token.get('access_token'),refresh_token=token.get('refresh_token'),expiry=exp,user_id=str(res)))
+
+        print(res3)
         
-        tokens = client['oauth_tokens']
-
         
+        print(user)
 
-        tokens.insert_one(
-            {
-          'access_token': credentials.token,
-          'refresh_token': credentials.refresh_token,
-          'expiry':credentials.expiry,
-          'client_id':credentials.client_id
-          }
-        )     
+        usr = {
+            'id':res,
+            'name':user.name,
+            'email':user.email,
+            'picture':user.picture
+        }
 
-
-
-        return RedirectResponse('/')
+        request.session['user'] = str(res)
+        
+        return RedirectResponse('/api/me')
 
     except Exception as e:
-        
-        print(e)
+        import traceback
+        print("Error:", traceback.format_exc())  # Debugging step
 
+        logger.warning(str(e))
 
+        return {"error": str(e)}
 
-
-
-def credentials_to_dict(credentials):
-  return {'token': credentials.token,
-          'refresh_token': credentials.refresh_token,
-          'granted_scopes': credentials.granted_scopes,
-          'expiry':credentials.expiry,
-          'client_id':credentials.client_id
-          }
 

@@ -1,20 +1,24 @@
 from pydantic import BaseModel
-
+from datetime import datetime, timedelta
 
 class User(BaseModel):
     email:str | None = None
     password: str | None = None
+    name: str | None = None
 
 
-class google_accounts(BaseModel):
+class Google_Accounts(BaseModel):
     email:str | None = None
     name:str | None = None
+    picture:str | None = None
+    lastLogin: datetime | None = datetime.now()
 
 
 class OAuthToken(BaseModel):
     access_token: str
     refresh_token: str
-    expiry: str
+    
+    expiry: datetime = datetime.now() + timedelta(minutes=59,seconds=59)
     user_id: str
 
 
