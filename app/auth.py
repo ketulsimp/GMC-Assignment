@@ -11,10 +11,11 @@ need to be created and managed.
 
 from fastapi import APIRouter,Request,HTTPException,Response
 from authlib.integrations.starlette_client import OAuth, OAuthError
-from app.utils import fetch_data,store_tokens,store_user, user_exists, create_tokens
+from app.utils import fetch_data,store_tokens,store_user, user_exists, create_tokens, get_token
 from app.settings import settings
 from fastapi.responses import RedirectResponse
 from app.logger import logger
+
 
 oauth = OAuth()
 oauth.register(
@@ -35,10 +36,12 @@ async def google_login(request: Request):
     return await oauth.google.authorize_redirect(request,redirect_uri=request.url_for('google_callback'))
 
 @auth_rt.get('/google/callback')
-async def google_callback(request: Request, response: Response):
+async def google_callback(request: Request):
     try:
         token = await oauth.google.authorize_access_token(request)
-    except OAuthError:
+        if request.is_disconnected():
+            raise OAuthError
+    except (OAuthError):
         logger.error(msg="Google Authorization error...")
         raise HTTPException(
             status_code=500,
@@ -47,19 +50,67 @@ async def google_callback(request: Request, response: Response):
     # These are access and refresh tokens of google which means they are meant to be used for calling any other
     # google api service on behalf of the user. They are not meant for authorization or authentication.
     google_access_token,google_refresh_token,expires_at,user_info = await fetch_data(token)
-    if not await user_exists(user_info.get('email')):
+    user = await user_exists(user_info.get('email'))
+    if not user:
         user_id = await store_user(**user_info,method='google')
         await store_tokens(google_access_token,google_refresh_token,expires_at,str(user_id))
         logger.info(f"Credentials stored for user: {user_id}")
-    await create_tokens(user_info.get('email'),response)
+    else:
+        await get_token(user)
     logger.info(f"Login Successful for user")
+    # headers = {'Set-Cookie': f'access_token=access_token'}
+    await create_tokens(user_info.get('email'),request)
     return RedirectResponse(url='/dashboard')
 
 @auth_rt.post('/logout')
-async def logout(response: Response):
-    response.delete_cookie('access_token')
-    response.delete_cookie('refresh_token')
-    
+async def logout(request: Request):
+    del request.session['access-token']
+    del request.session['refresh-token']
+    logger.info('Token deleted for user')
 
     
+    
+    
+"""Implementation using google oauth library"""
 
+# from fastapi import APIRouter, Request, Response, Cookie
+# from fastapi.responses import RedirectResponse
+# import os
+# auth_rt = APIRouter(prefix='/auth')
+
+# CLIENT_SECRETS_FILE = 'app/client_secrets.json'
+
+# SCOPES = ["openid email profile"]
+# os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+# os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
+
+# import google.oauth2.credentials
+# import google_auth_oauthlib.flow
+
+# flow = None
+
+# @auth_rt.get('/google/login')
+# async def login(request: Request, response: Response):
+#     global flow
+#     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(CLIENT_SECRETS_FILE,scopes=SCOPES)
+#     flow.redirect_uri = request.url_for('callback')
+    
+#     authrization_url, state = flow.authorization_url(
+#         access_type='offline',
+#         prompt='consent'
+#     )
+    
+#     response.set_cookie('state',state)
+#     return RedirectResponse(url=authrization_url)
+
+# @auth_rt.get('/google/callback')
+# async def callback(request: Request):
+#     global flow
+    
+#     authorization_response = str(request.url)
+#     print(authorization_response)
+#     flow.fetch_token(authorization_response=authorization_response,)
+    
+#     credentials = flow.credentials
+#     print(credentials)
+#     return RedirectResponse(url=request.url_for('main'))

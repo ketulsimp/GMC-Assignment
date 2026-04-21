@@ -1,6 +1,6 @@
 from app.db import get_mongo_db
 from datetime import datetime
-from fastapi import HTTPException, Cookie, Response
+from fastapi import HTTPException, Cookie, Request
 import httpx
 from app.settings import settings
 from app.logger import logger as logger
@@ -10,9 +10,9 @@ from fastapi.responses import RedirectResponse
 
 async def user_exists(email:str):
     db = get_mongo_db()
-    if await db.users.find_one({'email': email}):
-        return True
-    return False
+    if user:= await db.users.find_one({'email': email}):
+        return str(user['_id'])
+    return None
 
 async def refresh_token(refresh_token):
     params = {
@@ -68,21 +68,26 @@ async def store_tokens(access_token,refresh_token,expires_at,user_id):
     }
     await db.oauth_tokens.insert_one(token_data)
     
-async def create_tokens(user_email, response: Response):
+async def create_tokens(user_email, request: Request):
     access_token =  jwt.encode({'sub':user_email},settings.secret_key,algorithm="HS256")
     refresh_token = jwt.encode({'sub':user_email},settings.secret_key,algorithm="HS256")
-    response.set_cookie('access_token',access_token)
-    response.set_cookie('refresh_token',refresh_token)
+    # response.set_cookie('access_token',access_token)
+    # response.set_cookie('refresh_token',refresh_token)
+    request.session['access-token'] = access_token
+    request.session['refresh-token'] = refresh_token
     logger.info("Session based tokens created")
 
-async def authenticate(response: Response, access_token: str = Cookie(), refresh_token: str = Cookie()):
+async def authenticate(request: Request):
+    access_token = request.session.get('access-token')
+    refresh_token = request.session.get('refresh-token')
     try:
         user = jwt.decode(access_token,settings.secret_key,algorithms=["HS256"])
         return user['sub']
     except ExpiredSignatureError:
         try:
             user = jwt.decode(refresh_token,settings.secret_key,algorithms=["HS256"])
-            response.set_cookie('access_token',jwt.encode({'sub':user['sub']},settings.secret_key,algorithm="HS256"))
+            # response.set_cookie('access_token',jwt.encode({'sub':user['sub']},settings.secret_key,algorithm="HS256"))
+            request.session['access-token'] = jwt.encode({'sub':user['sub']},settings.secret_key,algorithm="HS256")
             return user['sub']
         except:
             logger.error("Authentication Failed")

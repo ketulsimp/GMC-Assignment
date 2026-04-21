@@ -13,7 +13,7 @@ _db = None
 
 async def connect_to_mongo():
     global _client,_db
-    _client = AsyncMongoClient(settings.mongo_uri)
+    _client = AsyncMongoClient(settings.mongo_uri,serverSelectionTimeoutMS=5000)
     _db = _client["day_1_task"]
     try:
         await _client.admin.command('ping')

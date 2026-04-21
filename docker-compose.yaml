@@ -1,0 +1,30 @@
+version: '1.0'
+
+services:
+  api:
+    build: .
+    container_name: 'day-1-task'
+    ports:
+      - '8001:8001'
+    env_file: 
+      - '/home/raj/Desktop/Day_1_Task/app/.env'
+    depends_on:
+      - mongodb
+    networks:
+      - internal_network
+
+  mongodb:
+    image: mongo:latest
+    container_name: 'mongodb_container'
+    volumes:
+      - mongo_data:/data
+    networks:
+      - internal_network
+
+volumes:
+  mongo_data:
+
+networks:
+  internal_network:
+    driver: bridge
+    
