@@ -1,11 +1,8 @@
 
-
-
 from flask import Blueprint, redirect, request, render_template, session, current_app
 import secrets, time, requests
-from config import CLIENT_ID, CLIENT_SECRET, REDIRECT_URI
-from db import db
-from crypto import encrypt_token
+from configuration.config import CLIENT_ID, CLIENT_SECRET, REDIRECT_URI
+from database.db import db
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -110,15 +107,13 @@ def callback():
 
     existing = db.oauth_tokens.find_one({"user_id": user_doc["_id"]})
 
-    encrypted_access = encrypt_token(access_token)
-
     update_data = {
-        "access_token": encrypted_access,
+        "access_token": access_token,
         "expiry": expiry
     }
 
     if refresh_token:
-        update_data["refresh_token"] = encrypt_token(refresh_token)
+        update_data["refresh_token"] = refresh_token
     elif existing and "refresh_token" in existing:
         pass
     else:
@@ -131,15 +126,8 @@ def callback():
         upsert=True
     )
 
-    current_app.logger.info("Token Stored Securely!")
+    current_app.logger.info("Login Successful! Token Stored.")
 
     session["user_email"] = user["email"]
 
-    return redirect("/success")
-
-
-@auth_bp.route("/success")
-def success():
-    email = session.get("user_email")
-    current_app.logger.info("Login Successful!")
-    return render_template("success.html", email=email)
+    return redirect("/profile")

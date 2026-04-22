@@ -2,10 +2,9 @@
 
 import requests
 import time
-from config import CLIENT_ID, CLIENT_SECRET
-from db import db, TokenRevokedError
+from configuration.config import CLIENT_ID, CLIENT_SECRET
+from database.db import db, TokenRevokedError
 import logging
-from crypto import decrypt_token, encrypt_token
 
 logger = logging.getLogger(__name__)
 
@@ -16,11 +15,7 @@ def refresh_access_token(user_id):
     if not record or "refresh_token" not in record:
         raise Exception("No refresh token")
 
-    try:
-        stored_refresh_token = decrypt_token(record["refresh_token"])
-    except Exception:
-        logger.error("Failed to decrypt refresh token")
-        raise Exception("Corrupted token")
+    stored_refresh_token = record["refresh_token"]
 
     try:
         response = requests.post(
@@ -60,7 +55,7 @@ def refresh_access_token(user_id):
         {"user_id": user_id},
         {
             "$set": {
-                "access_token": encrypt_token(access_token),
+                "access_token": access_token,
                 "expiry": time.time() + data.get("expires_in", 3600)
             }
         }
@@ -92,11 +87,7 @@ def get_valid_token(user_id):
         raise Exception("No token record found")
 
     if time.time() < record.get("expiry", 0) - 60:
-        try:
-            access_token = decrypt_token(record["access_token"])
-        except Exception:
-            logger.error("Failed to decrypt access token")
-            raise Exception("Corrupted access token")
+        access_token = record["access_token"]
 
         if verify_token_with_google(access_token):
             return access_token
@@ -106,3 +97,4 @@ def get_valid_token(user_id):
 
     logger.info(f"Access token expired for user {user_id}, refreshing")
     return refresh_access_token(user_id)
+

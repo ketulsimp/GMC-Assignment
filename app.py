@@ -1,7 +1,9 @@
 from flask import Flask, render_template, request
-from config import SECRET_KEY
-from auth import auth_bp
+from configuration.config import SECRET_KEY
+from auth.auth import auth_bp
 from profile import profile_bp
+from merchant.merchantapi import merchant_bp
+from middleware import register_middleware
 import logging
 
 API_SERVICE_NAME = 'GOOGLE OAUTH'
@@ -22,6 +24,8 @@ app.secret_key = SECRET_KEY
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(profile_bp)
+app.register_blueprint(merchant_bp)
+register_middleware(app)
 
 @app.route("/")
 def home():

@@ -1,6 +1,6 @@
 
 from cryptography.fernet import Fernet
-from config import FERNET_KEY
+from configuration.config import FERNET_KEY
 
 fernet = Fernet(FERNET_KEY.encode() if isinstance(FERNET_KEY, str) else FERNET_KEY)
 
