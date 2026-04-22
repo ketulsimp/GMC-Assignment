@@ -1,6 +1,100 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .box {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 40px 36px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .icon {
+            font-size: 40px;
+            margin-bottom: 16px;
+        }
+
+        h2 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 28px;
+            line-height: 1.5;
+        }
+
+        a {
+            display: inline-block;
+            padding: 10px 24px;
+            background: #4285f4;
+            color: #fff;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        a:hover { background: #3367d6; }
+    </style>
+</head>
 <body>
-    <h2>Error</h2>
-    <p>{{ message }}</p>
+    <div class="box">
+        <div class="icon">⚠️</div>
+
+        {% if error == "access_denied" %}
+            <h2>Login Cancelled</h2>
+            <p>You cancelled the Google login. No data was saved.</p>
+
+        {% elif error == "access_revoked" %}
+            <h2>Access Revoked</h2>
+            <p>Your Google access has been revoked. Please sign in again to continue.</p>
+
+        {% elif error == "session_expired" %}
+            <h2>Session Expired</h2>
+            <p>Your session has expired. Please sign in again.</p>
+
+        {% elif error == "not_logged_in" %}
+            <h2>Not Logged In</h2>
+            <p>You need to sign in to access this page.</p>
+
+        {% elif error == "network_error" %}
+            <h2>Network Error</h2>
+            <p>Could not reach Google. Check your connection and try again.</p>
+
+        {% elif error == "invalid_state" %}
+            <h2>Invalid Request</h2>
+            <p>The login request was invalid or tampered with. Please try again.</p>
+
+        {% elif error == "token_error" %}
+            <h2>Token Error</h2>
+            <p>There was a problem with your session token. Please sign in again.</p>
+
+        {% else %}
+            <h2>Something Went Wrong</h2>
+            <p>An unexpected error occurred. Please try again.</p>
+        {% endif %}
+
+        <a href="/">Back to Home</a>
+    </div>
 </body>
 </html>

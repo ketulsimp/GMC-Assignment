@@ -1,6 +1,4 @@
-
-
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from config import SECRET_KEY
 from auth import auth_bp
 from profile import profile_bp
@@ -27,6 +25,9 @@ app.register_blueprint(profile_bp)
 
 @app.route("/")
 def home():
+    error = request.args.get("error")
+    if error:
+        return render_template("error.html", error=error)
     return render_template("index.html")
 
 if __name__ == "__main__":
