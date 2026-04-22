@@ -1,0 +1,41 @@
+services:
+  app:
+    build: .
+    container_name: merchant_app
+    restart: unless-stopped
+    ports:
+      - 8000:8000
+    env_file:
+      - .env
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/merchant_db
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    networks:
+      - merchant_net
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo_container
+    restart: unless-stopped
+    ports:
+      - 27017:27017
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - merchant_net
+
+volumes:
+  mongo_data:
+
+networks:
+  merchant_net:
+    driver: bridge

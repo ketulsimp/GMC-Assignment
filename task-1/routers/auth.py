@@ -57,7 +57,7 @@ REDIRECT_URL=os.getenv('REDIRECT_URI')
 
 @router.get("/login/google")
 async def login():
-    url = f"https://accounts.google.com/o/oauth2/auth?client_id={GCI}&redirect_uri={REDIRECT_URL}&response_type=code&scope=openid email profile&access_type=offline&prompt=consent"
+    url = f"https://accounts.google.com/o/oauth2/auth?client_id={GCI}&redirect_uri={REDIRECT_URL}&response_type=code&scope=openid email profile https://www.googleapis.com/auth/content&access_type=offline&prompt=consent"
     return RedirectResponse(url=url)
 
 @router.get("/google/callback")
@@ -68,6 +68,7 @@ async def auth_callback(code: str):
             'client_id': os.environ['GOOGLE_CLIENT_ID'],
             'client_secret': os.environ['GOOGLE_CLIENT_SECRET'],
             'redirect_uri': REDIRECT_URL,
+            'scope':'https://www.googleapis.com/auth/content',
             'grant_type': 'authorization_code'
         })
         tokens = token_response.json()
@@ -91,6 +92,12 @@ async def auth_callback(code: str):
 
         return response
 
+
+@router.get('/switch')
+async def switch_account():
+    response=RedirectResponse(url='/login/google')
+    response.delete_cookie('token')
+    return response
 
 @router.get('/logout')
 async def logout():

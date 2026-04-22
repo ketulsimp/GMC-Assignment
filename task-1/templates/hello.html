@@ -8,5 +8,21 @@
 <body>
     <h1>"Hello {{name}}"</h1>
     <a href="/logout">Logout</a>
+    <br>
+    <br>
+    <button><a href="/switch">Switch Account</a></button>
+    <button><a href="/merchant/accounts">SEE ACCOUNTS</a></button>
+    <br>
+    <br>
+    <span>{{message}}</span>
+    <ul>
+        {% for account in responses %}
+        <strong>Acount Name: </strong>{{account.accountName}}
+        <br>
+        <strong>Account Id: </strong>{{account.accountId}}
+        <br>
+        <br>
+        {%endfor%}
+    </ul>
 </body>
 </html>
