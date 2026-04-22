@@ -8,3 +8,15 @@ authlib
 pyjwt
 httpx
 itsdangerous
+google-shopping-merchant-accounts
+google-shopping-merchant-datasources
+google-shopping-merchant-inventories
+google-shopping-merchant-notifications
+google-shopping-merchant-ordertracking
+google-shopping-merchant-products
+google-shopping-merchant-productstudio
+google-shopping-merchant-promotions
+google-shopping-merchant-quota
+google-shopping-merchant-reports
+google-shopping-merchant-reviews
+googleapis-common-protos

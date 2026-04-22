@@ -4,8 +4,9 @@ from app.config.db import connect_to_mongo, disconnect_to_mongo
 from app.routes.auth import auth_rt
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.middleware.cors import CORSMiddleware
-from app.utilities.utils import get_token, authenticate
+from app.utilities.auth_utils import get_token, authenticate
 from app.config.settings import settings
+from app.routes.merchant import merchants_rt
 
 
 @asynccontextmanager
@@ -21,6 +22,11 @@ app.add_middleware(SessionMiddleware, secret_key=settings.session_secret_key)
 #     allow_methods=["*"],
 #     allow_headers=["*"])
 app.include_router(auth_rt)
+app.include_router(merchants_rt)
+
+@app.get('/home')
+async def home():
+    return "Welcome to Home Page"
 
 @app.get('/dashboard')
 async def main(user = Depends(authenticate)):

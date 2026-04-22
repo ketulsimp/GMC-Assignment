@@ -9,13 +9,14 @@ It is not feasible to store these tokens in db and perform session management th
 need to be created and managed.
 """
 
-from fastapi import APIRouter,Request,HTTPException,Response
+from fastapi import APIRouter,Request,HTTPException,Depends
 from authlib.integrations.starlette_client import OAuth, OAuthError
-from app.utilities.utils import fetch_data,store_tokens,store_user, user_exists, create_tokens, fetch_token
+from app.utilities.auth_utils import fetch_data,store_tokens,store_user, user_exists, create_tokens, fetch_token, delete_user_credentials, authenticate
 from app.config.settings import settings
 from fastapi.responses import RedirectResponse
 from app.log.logger import logger
 import httpx
+from app.error.exceptions import TokenNotFoundError
 
 
 oauth = OAuth()
@@ -25,7 +26,7 @@ oauth.register(
     client_secret=settings.google_client_secret,
     authorize_url="https://accounts.google.com/o/oauth2/auth",
     access_token_url="https://oauth2.googleapis.com/token",
-    authorize_params={"scope": "openid email profile", "access_type":"offline","prompt":"consent"},
+    authorize_params={"scope": "openid email profile https://www.googleapis.com/auth/content", "access_type":"offline","prompt":"consent"},
     client_kwargs={"scope": "openid email profile"},
     server_metadata_url="https://accounts.google.com/.well-known/openid-configuration"
 )
@@ -64,24 +65,36 @@ async def google_callback(request: Request):
     await create_tokens(user_info.get('email'),request)
     return RedirectResponse(url='/dashboard')
 
-@auth_rt.get('/logout',)
-async def logout(request: Request):
-    del request.session['access-token']
-    del request.session['refresh-token']
-    user = request.session['user']
-    del request.session['user']
-    token = await fetch_token(user)
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            url='https://oauth2.googleapis.com/revoke',
-            params={'token':token},
-            headers={'content-type':'application/x-www-form-urlencoded'}
-        )
-    if response.status_code==200:
-        logger.info(f"Token successfully deleted for user {user}")
-        logger.info(f"Logout Successfull for user {user}")
-    else:
-        logger.error(f"Token deletion unsuccessfull")
+@auth_rt.get('/hard-logout')
+async def hard_logout(request: Request,user = Depends(authenticate)):
+    user = await delete_user_credentials(request)
+    try:
+        token = await fetch_token(user)
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                url='https://oauth2.googleapis.com/revoke',
+                params={'token':token},
+                headers={'content-type':'application/x-www-form-urlencoded'}
+            )
+        if response.status_code==200:
+            logger.info(f"Token successfully deleted for user {user}")
+            logger.info(f"Hard Logout Successfull for user {user}")
+        else:
+            logger.error(f"Token deletion unsuccessfull")
+    except TokenNotFoundError:
+        pass
+    return RedirectResponse(url=request.url_for('home'))
+    
+        
+@auth_rt.get('/soft-logout')
+async def soft_logout(request: Request):
+    user = await delete_user_credentials(request)
+    return RedirectResponse(url=request.url_for('home'))
+        
+@auth_rt.get('/change-account')
+async def change_account(request: Request):
+    await delete_user_credentials(request)
+    return RedirectResponse(url=request.url_for('google_login'))
 
     
 

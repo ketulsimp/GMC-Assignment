@@ -1,5 +1,5 @@
 from app.config.db import get_mongo_db
-from datetime import datetime
+from datetime import datetime,timedelta
 from fastapi import HTTPException, Cookie, Request
 import httpx
 from app.config.settings import settings
@@ -7,6 +7,7 @@ from app.log.logger import logger as logger
 import jwt
 from jwt.exceptions import ExpiredSignatureError
 from fastapi.responses import RedirectResponse
+from app.error.exceptions import TokenNotFoundError
 
 async def user_exists(email:str):
     db = get_mongo_db()
@@ -40,15 +41,18 @@ async def get_token(user_id):
             logger.info(f"New Access Token set for user_id: {user_id}")
             return new_access_token
         return token_data.get('access_token')
-    raise HTTPException(status_code=500, detail='Token does not exist.')
+    raise TokenNotFoundError
 
 async def fetch_token(user_id):
     db = get_mongo_db()
     doc = await db.oauth_tokens.find_one_and_delete({'user':user_id})
-    return doc.get('access_token')
+    if token:= doc.get('access_token'):
+        return token
+    raise TokenNotFoundError
 
 async def fetch_data(payload):
     access_token = payload.get('access_token')
+    print(access_token)
     refresh_token = payload.get('refresh_token')
     expires_at = payload.get('expires_in') + datetime.now().timestamp()
     user_info = {
@@ -96,14 +100,20 @@ async def authenticate(request: Request):
         try:
             user = jwt.decode(refresh_token,settings.secret_key,algorithms=["HS256"])
             # response.set_cookie('access_token',jwt.encode({'sub':user['sub']},settings.secret_key,algorithm="HS256"))
-            request.session['access-token'] = jwt.encode({'sub':user['sub']},settings.secret_key,algorithm="HS256")
+            request.session['access-token'] = jwt.encode({'sub':user['sub'],'exp':timedelta(minutes=10)},settings.secret_key,algorithm="HS256")
             return user['sub']
         except:
             logger.error("Authentication Failed")
-            return RedirectResponse(url='/auth/google/login')
+            return RedirectResponse(url='/home')
     except Exception:
         logger.error("Authentication Failed")
-        return RedirectResponse(url='/auth/google/login')
+        return RedirectResponse(url='/home')
+    
+async def delete_user_credentials(request: Request):
+    request.session.pop('access_token',None)
+    request.session.pop('refresh_token',None)
+    return request.session.pop('user',None)
+    
 
             
 
