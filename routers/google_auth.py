@@ -1,17 +1,17 @@
 import logging
 from datetime import datetime , timedelta
-from typing import Annotated
 from fastapi import Depends, Request, APIRouter, Response
 from utils.schema import TokenResponse,RefreshRequest
 from fastapi.exceptions import HTTPException
+from fastapi.responses import RedirectResponse
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
-from utils.db_helper import User,Token,get_db,get_settings
+from utils.db_helper import User,Token,get_db
 from authlib.integrations.starlette_client import OAuth
 import os
 import httpx
 from dotenv import load_dotenv
-from utils.db_helper import get_settings,Settings
+import secrets
 
 load_dotenv()
 
@@ -33,9 +33,9 @@ oauth.register(
     client_id=os.environ['GOOGLE_CLIENT_ID'],
     client_secret=os.environ['GOOGLE_CLIENT_SECRET'],
     authorize_url="https://accounts.google.com/o/oauth2/auth",
-    authorize_params={"scope": "openid email profile"},
+    authorize_params={"scope": "openid email profile https://www.googleapis.com/auth/content"},
     access_token_url="https://oauth2.googleapis.com/token",
-    client_kwargs={"scope": "openid email profile"},
+    client_kwargs={"scope": "openid email profile https://www.googleapis.com/auth/content"},
     server_metadata_url="https://accounts.google.com/.well-known/openid-configuration"
 )
 
@@ -43,23 +43,45 @@ oauth.register(
 # Redirect user to Google for authentication
 @router.get("/auth/google")
 async def auth_google(request: Request):
-    if request.get('error'):
-        logging.exception('invalid move by user')
-        return {'msg':'user invalid move'}
     logger.info('logging attempt with google')
-    return await oauth.google.authorize_redirect(request, redirect_uri="http://127.0.0.1:8000/auth/google/callback",prompt='consent',access_type='offline')
+    state = secrets.token_urlsafe(16)
+    request.session["oauth_state"] = state
 
+    return await oauth.google.authorize_redirect(
+        request,
+        redirect_uri="http://127.0.0.1:8000/auth/google/callback",
+        state=state,
+        prompt="consent",
+        access_type="offline"
+    )
 
 # Handle the OAuth callback from Google
 @router.get("/auth/google/callback")
-async def google_callback(request: Request,res: Response,settings: Annotated[Settings, Depends(get_settings)],db: Session = Depends(get_db)):
+async def google_callback(request: Request,res: Response,db: Session = Depends(get_db)):
     try:
-        token = await oauth.google.authorize_access_token(request)
-        user_info = token.get("userinfo") or {}
-        email = user_info['email']
+        try:
+            token = await oauth.google.authorize_access_token(request)
+        except Exception:
+            return RedirectResponse("/login?error=token_failed")
         
-        
-        
+        if request.query_params.get("error") == "access_denied":
+            return RedirectResponse("/login?error=cancelled")
+
+        # 2. Session missing
+        if "oauth_state" not in request.session:
+            return RedirectResponse("/login?error=session_expired")
+
+        # 3. Invalid state
+        if request.query_params.get("state") != request.session.get("oauth_state"):
+            return RedirectResponse("/login?error=invalid_state")
+
+        user_info = token.get("userinfo")
+        if not user_info:
+            return RedirectResponse("/login?error=userinfo_failed")
+            
+        email = user_info.get('email')
+        if not email:
+            return {'msg':'email not found'}
         
         result = db.execute(
             select(User).where(User.email == email)
@@ -75,7 +97,7 @@ async def google_callback(request: Request,res: Response,settings: Annotated[Set
             select(Token).where(Token.user_email == email)
         )
         token_data_from_db = token_data.scalar_one_or_none()
-        expires_at = datetime.utcnow() + timedelta(days=7)
+        expires_at = datetime.utcnow() + timedelta(seconds=token['expires_in'])
         if token_data_from_db is None:
             # token_data = Token(access_token=token['access_token'],refresh_token=token['refresh_token'],expires_at=expires_at,user_email=user_info['email'])
             token_data = Token(access_token=token['access_token'],refresh_token=token['refresh_token'],expires_at=expires_at,user_email=user_info['email'])
@@ -91,12 +113,12 @@ async def google_callback(request: Request,res: Response,settings: Annotated[Set
             db.commit()
             
         
-        logging.info(f'successfully logging with google for {email}')
+        logger.info(f'successfully logging with google for {email}')
         
         res.set_cookie(
-        key="refresh_token", value=token['refresh_token'], httponly=True, secure=True, samesite="lax")
+        key="session_id", value=token['refresh_token'], httponly=True, secure=True, samesite="lax")
 
-        return {"access_token": token['access_token'], "token_type": "bearer"}
+        return RedirectResponse(url='/dashboard')
 
 
 
@@ -107,7 +129,7 @@ async def google_callback(request: Request,res: Response,settings: Annotated[Set
         return {"error": str(e)}
     
 @router.post("/refresh", response_model=TokenResponse)
-async def refresh(
+async def refresh(request : Request,
     req: RefreshRequest,
     db: Session = Depends(get_db)
 ):
@@ -117,6 +139,8 @@ async def refresh(
         result = db.execute(
             select(Token).where(Token.refresh_token == req.refreshToken)
         )
+        
+        session_id = request.cookies.get('session_id')
 
         stored = result.scalar_one_or_none()
 
@@ -150,13 +174,15 @@ async def refresh(
         db.execute(up)
         db.commit()        
         
-        return TokenResponse(
-            accessToken=access_token,
-            refreshToken=req.refreshToken
-        )
+        return {'access_token':access_token}
         
     except HTTPException:
         raise
-    except Exception as error:
-        logger.error(f'Refresh error: {error}')
-        raise HTTPException(status_code=500, detail={'error': 'Internal server error'})
+    # except Exception as error:
+    #     logger.error(f'Refresh error: {error}')
+    #     raise HTTPException(status_code=500, detail={'error': 'Internal server error'})
+    
+    
+@router.get('/dashboard')
+def dash():
+    return {'msg':'welcome to dashboard'}
