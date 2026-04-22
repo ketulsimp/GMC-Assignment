@@ -11,10 +11,11 @@ need to be created and managed.
 
 from fastapi import APIRouter,Request,HTTPException,Response
 from authlib.integrations.starlette_client import OAuth, OAuthError
-from app.utils import fetch_data,store_tokens,store_user, user_exists, create_tokens, get_token
-from app.settings import settings
+from app.utilities.utils import fetch_data,store_tokens,store_user, user_exists, create_tokens, fetch_token
+from app.config.settings import settings
 from fastapi.responses import RedirectResponse
-from app.logger import logger
+from app.log.logger import logger
+import httpx
 
 
 oauth = OAuth()
@@ -30,16 +31,18 @@ oauth.register(
 )
 
 auth_rt = APIRouter(prefix='/auth')
+print(oauth.register)
 
 @auth_rt.get('/google/login')
 async def google_login(request: Request):
-    return await oauth.google.authorize_redirect(request,redirect_uri=request.url_for('google_callback'))
+    return await oauth.google.authorize_redirect(request,redirect_uri=request.url_for('google_callback'))    
 
 @auth_rt.get('/google/callback')
 async def google_callback(request: Request):
     try:
         token = await oauth.google.authorize_access_token(request)
-        if request.is_disconnected():
+        if await request.is_disconnected():
+            print(await request.is_disconnected)
             raise OAuthError
     except (OAuthError):
         logger.error(msg="Google Authorization error...")
@@ -50,32 +53,47 @@ async def google_callback(request: Request):
     # These are access and refresh tokens of google which means they are meant to be used for calling any other
     # google api service on behalf of the user. They are not meant for authorization or authentication.
     google_access_token,google_refresh_token,expires_at,user_info = await fetch_data(token)
-    user = await user_exists(user_info.get('email'))
-    if not user:
+    user_id = await user_exists(user_info.get('email'))
+    if not user_id:
         user_id = await store_user(**user_info,method='google')
-        await store_tokens(google_access_token,google_refresh_token,expires_at,str(user_id))
-        logger.info(f"Credentials stored for user: {user_id}")
-    else:
-        await get_token(user)
+    await store_tokens(google_access_token,google_refresh_token,expires_at,str(user_id))
+    request.session['user'] = user_id
+    logger.info(f"Credentials stored for user: {user_id}")
     logger.info(f"Login Successful for user")
     # headers = {'Set-Cookie': f'access_token=access_token'}
     await create_tokens(user_info.get('email'),request)
     return RedirectResponse(url='/dashboard')
 
-@auth_rt.post('/logout')
+@auth_rt.get('/logout',)
 async def logout(request: Request):
     del request.session['access-token']
     del request.session['refresh-token']
-    logger.info('Token deleted for user')
+    user = request.session['user']
+    del request.session['user']
+    token = await fetch_token(user)
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            url='https://oauth2.googleapis.com/revoke',
+            params={'token':token},
+            headers={'content-type':'application/x-www-form-urlencoded'}
+        )
+    if response.status_code==200:
+        logger.info(f"Token successfully deleted for user {user}")
+        logger.info(f"Logout Successfull for user {user}")
+    else:
+        logger.error(f"Token deletion unsuccessfull")
 
     
+
     
-    
-"""Implementation using google oauth library"""
+# """Implementation using google oauth library"""
 
 # from fastapi import APIRouter, Request, Response, Cookie
 # from fastapi.responses import RedirectResponse
 # import os
+# import google.oauth2.credentials
+# import google_auth_oauthlib.flow
+
 # auth_rt = APIRouter(prefix='/auth')
 
 # CLIENT_SECRETS_FILE = 'app/client_secrets.json'
@@ -84,14 +102,9 @@ async def logout(request: Request):
 # os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 # os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
 
-# import google.oauth2.credentials
-# import google_auth_oauthlib.flow
-
-# flow = None
 
 # @auth_rt.get('/google/login')
 # async def login(request: Request, response: Response):
-#     global flow
 #     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(CLIENT_SECRETS_FILE,scopes=SCOPES)
 #     flow.redirect_uri = request.url_for('callback')
     
@@ -99,18 +112,23 @@ async def logout(request: Request):
 #         access_type='offline',
 #         prompt='consent'
 #     )
-    
-#     response.set_cookie('state',state)
+#     code_verifier = flow.code_verifier
+#     request.session['state'] = state
+#     request.session['code_verifier'] = code_verifier
 #     return RedirectResponse(url=authrization_url)
 
 # @auth_rt.get('/google/callback')
 # async def callback(request: Request):
-#     global flow
+#     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(CLIENT_SECRETS_FILE,scopes=SCOPES,state=request.session['state'])
+#     flow.code_verifier = request.session['code_verifier']
+#     flow.redirect_uri = request.url_for('callback')
     
 #     authorization_response = str(request.url)
 #     print(authorization_response)
-#     flow.fetch_token(authorization_response=authorization_response,)
+#     flow.fetch_token(authorization_response=authorization_response)
     
 #     credentials = flow.credentials
+#     del request.session['state']
+#     del request.session['code_verifier']
 #     print(credentials)
 #     return RedirectResponse(url=request.url_for('main'))

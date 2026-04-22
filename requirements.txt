@@ -1,6 +1,10 @@
-fastapi["standard"]
+fastapi[standard]
 pymongo
 google-api-python-client
 google-auth-httplib2
 google-auth-oauthlib
 google-auth
+authlib
+pyjwt
+httpx
+itsdangerous

@@ -3,3 +3,4 @@ venv
 __pycache__
 GMC_Assignment
 client_secrets.json
+logs.log

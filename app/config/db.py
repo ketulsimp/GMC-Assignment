@@ -5,8 +5,8 @@ Also has the function which returns the db instance
 """
 
 from pymongo import AsyncMongoClient
-from app.settings import settings
-from app.logger import logger
+from app.config.settings import settings
+from app.log.logger import logger
 
 _client: AsyncMongoClient = None
 _db = None

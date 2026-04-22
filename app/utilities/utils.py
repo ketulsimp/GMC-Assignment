@@ -1,18 +1,22 @@
-from app.db import get_mongo_db
+from app.config.db import get_mongo_db
 from datetime import datetime
 from fastapi import HTTPException, Cookie, Request
 import httpx
-from app.settings import settings
-from app.logger import logger as logger
+from app.config.settings import settings
+from app.log.logger import logger as logger
 import jwt
 from jwt.exceptions import ExpiredSignatureError
 from fastapi.responses import RedirectResponse
 
 async def user_exists(email:str):
     db = get_mongo_db()
-    if user:= await db.users.find_one({'email': email}):
-        return str(user['_id'])
-    return None
+    user = await db.users.find_one({'email': email})
+    return str(user.get('_id')) if user else None
+    
+async def token_exists(user: str):
+    db = get_mongo_db()
+    doc = await db.oauth_tokens.find_one({'user':user})
+    return True if doc else False
 
 async def refresh_token(refresh_token):
     params = {
@@ -38,10 +42,15 @@ async def get_token(user_id):
         return token_data.get('access_token')
     raise HTTPException(status_code=500, detail='Token does not exist.')
 
+async def fetch_token(user_id):
+    db = get_mongo_db()
+    doc = await db.oauth_tokens.find_one_and_delete({'user':user_id})
+    return doc.get('access_token')
+
 async def fetch_data(payload):
     access_token = payload.get('access_token')
     refresh_token = payload.get('refresh_token')
-    expires_at = payload.get('expires_at')
+    expires_at = payload.get('expires_in') + datetime.now().timestamp()
     user_info = {
         'name': payload['userinfo'].get('name'),
         'email': payload['userinfo'].get('email')
@@ -56,7 +65,7 @@ async def store_user(name,email,method):
         'method': method
     }
     result = await db.users.insert_one(doc)
-    return result.inserted_id
+    return str(result.inserted_id)
 
 async def store_tokens(access_token,refresh_token,expires_at,user_id):
     db = get_mongo_db()
@@ -66,7 +75,7 @@ async def store_tokens(access_token,refresh_token,expires_at,user_id):
         'refresh_token': refresh_token,
         'expires_at': expires_at
     }
-    await db.oauth_tokens.insert_one(token_data)
+    await db.oauth_tokens.replace_one({'user':user_id},token_data,upsert=True)
     
 async def create_tokens(user_email, request: Request):
     access_token =  jwt.encode({'sub':user_email},settings.secret_key,algorithm="HS256")

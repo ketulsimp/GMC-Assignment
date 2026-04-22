@@ -1,11 +1,11 @@
 from fastapi import FastAPI, Depends, Response
 from contextlib import asynccontextmanager
-from app.db import connect_to_mongo, disconnect_to_mongo
-from app.auth import auth_rt
+from app.config.db import connect_to_mongo, disconnect_to_mongo
+from app.routes.auth import auth_rt
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.middleware.cors import CORSMiddleware
-from app.utils import get_token, authenticate
-from app.settings import settings
+from app.utilities.utils import get_token, authenticate
+from app.config.settings import settings
 
 
 @asynccontextmanager
