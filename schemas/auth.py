@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import datetime, timedelta
 
 class User(BaseModel):
@@ -11,7 +11,7 @@ class Google_Accounts(BaseModel):
     email:str | None = None
     name:str | None = None
     picture:str | None = None
-    lastLogin: datetime | None = datetime.now()
+    lastLogin: datetime | None = Field(default_factory=lambda: datetime.now())
 
 
 class OAuthToken(BaseModel):

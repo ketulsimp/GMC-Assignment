@@ -12,10 +12,9 @@ oauth.register(
     client_id = os.environ['GOOGLE_CLIENT_ID'],
     client_secret = os.environ['GOOGLE_CLIENT_SECRET'],
     authorize_url="https://accounts.google.com/o/oauth2/auth",
-    authorize_params={"scope": "openid email profile"},
+    authorize_params={"scope": "openid email profile https://www.googleapis.com/auth/content"},
     access_token_url="https://oauth2.googleapis.com/token",
-    client_kwargs={"scope": "openid email profile"},
+    client_kwargs={"scope": "openid email profile https://www.googleapis.com/auth/content"},
         server_metadata_url="https://accounts.google.com/.well-known/openid-configuration"
-
 
 )

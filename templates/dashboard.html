@@ -3,12 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Page </title>
+    <title>User Page</title>
 </head>
 <body>
-    {{ user }}
+    <p>{{ user.name }}</p>
+    <p>{{ user.email }}</p>
+
+    <!-- Merchant Dropdown -->
+    <form method="POST" action="">
+        <label for="merchant">Select Merchant:</label>
+        <select name="merchant_id" id="merchant" onchange="this.form.submit()">
+            {% for account in merchant.accounts %}
+                <option value="{{ account.accountId }}"
+                    {% if selected_merchant and merchant.accountId == selected_merchant.accountId %}
+                        selected
+                    {% endif %}
+                >
+                    {{ account.name }}
+                </option>
+            {% endfor %}
+        </select>   
+    </form>
+
+
+
     <a href="/api/logout">Logout</a>
-
-
 </body>
 </html>

@@ -1,6 +1,5 @@
 
 import logging
-from fastapi import FastAPI
 
 
 file_handler = logging.FileHandler("oauth.log")

@@ -1,21 +1,17 @@
-from utils.oauth import oauth
 import os
-from starlette.middleware.base import BaseHTTPMiddleware 
 from fastapi import Request
 from fastapi.exceptions import HTTPException
 from db.get_client import db
 from db.users import update_access_token
 from datetime import datetime, timedelta
-from bson import ObjectId
 from utils.logger import logger
 import httpx
-import ast
 
 
 async def check_token_expiry(request:Request): 
         logger.info('Entered middleware')
 
-        user = request.session['user']
+        user = request.session['id']
         
         if user:
 
@@ -47,6 +43,7 @@ async def check_token_expiry(request:Request):
                         return res
                 else:
                      print('valid Token')
+                     return tok.get('access_token')
             else:
                 print('Token not found')
 

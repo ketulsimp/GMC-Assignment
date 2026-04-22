@@ -1,4 +1,9 @@
 from pymongo import AsyncMongoClient
+from dotenv import load_dotenv
+import os
 
-client = AsyncMongoClient('mongodb://localhost:27017/')
+load_dotenv()
+
+
+client = AsyncMongoClient(os.environ['MONGO_URL'])
 db = client['merchant']

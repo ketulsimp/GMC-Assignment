@@ -1,0 +1,62 @@
+services:
+  app:
+      build: 
+        context: .
+        dockerfile: Dockerfile
+
+      container_name: merchant_app
+
+      depends_on: 
+        db:
+          condition: service_healthy
+
+      env_file: ./.env
+
+      ports: 
+      - 8000:8000
+
+      volumes: 
+        - ./logs:/app/logs
+
+      networks: 
+        - merchant_net
+
+  db:
+      image: mongo:7.0
+
+      container_name: merchant_db
+
+      ports: 
+        - 27017:27017
+
+      healthcheck:
+        test: ["CMD", "mongosh", "ping"]
+        interval: 5s
+        timeout: 3s
+        retries: 5
+        start_period: 10s
+
+      volumes:
+        - mongo_data:/data/db
+
+      networks: 
+        - merchant_net
+
+  
+volumes:
+  mongo_data:
+    
+
+
+networks:
+  merchant_net:
+    driver: bridge 
+
+
+
+
+
+
+
+
+

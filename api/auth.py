@@ -7,7 +7,6 @@ from db.users import insert_google_acc_to_db, insert_token_to_db, insert_user_to
 from utils.oauth import oauth
 from schemas.auth import User, Google_Accounts, OAuthToken
 from datetime import datetime, timedelta
-import requests
 import os
 from utils.logger import logger
 
@@ -28,10 +27,6 @@ def login(request: Request):
         request=request, name='login.html'
     )
 
-
-
-
-
 @auth.get('/google/login')
 async def authorize(request: Request):
     try:
@@ -41,33 +36,27 @@ async def authorize(request: Request):
     except Exception as e:
         import traceback
         print("Error:", traceback.format_exc())  # Debugging step
-
         logger.warning(str(e))
-
         return {"error": str(e)}
 
     
 
-
-
 @auth.get('/google/callback')
 async def callback(request:Request,state: str|None = None , code: str|None =None, error: str|None = None):
     try:
-        print('callback called')
-        
+        if not state:
+            return templates.TemplateResponse(
+                request=request, name='error.html', context={'msg':str(error)}
+            )
         if error:
             return templates.TemplateResponse(
         request=request, name='error.html',context={'msg':str(error)}
-    )
+        )
 
         logger.info('Code Recevied Starting Acesssing token')
-
         token = await oauth.google.authorize_access_token(request)
-  
         logger.info('Token Recevied Starting Parsing Token for user')
-
         user = await oauth.google.parse_id_token(request, token)
-        
         logger.info('User parsed. Starting DB Ops')
 
         print(token)
@@ -89,13 +78,16 @@ async def callback(request:Request,state: str|None = None , code: str|None =None
         print(user)
 
         usr = {
-            'id':res,
+            'id':str(res),
             'name':user.name,
             'email':user.email,
             'picture':user.picture
         }
 
-        request.session['user'] = str(res)
+        request.session['id'] = str(res)
+        request.session['user'] = usr
+        request.session['google_acc_id'] = str(res1)
+        request.session['state'] = state
         
         return RedirectResponse('/api/me')
 
