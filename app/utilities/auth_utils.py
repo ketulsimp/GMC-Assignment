@@ -104,15 +104,15 @@ async def authenticate(request: Request):
             return user['sub']
         except:
             logger.error("Authentication Failed")
-            return RedirectResponse(url='/home')
+            raise HTTPException(status_code=403)
     except Exception:
         logger.error("Authentication Failed")
-        return RedirectResponse(url='/home')
+        raise HTTPException(status_code=403)
     
 async def delete_user_credentials(request: Request):
-    request.session.pop('access_token',None)
-    request.session.pop('refresh_token',None)
-    return request.session.pop('user',None)
+    user = request.session.pop('user',None)
+    request.session.clear()
+    return user
     
 
             

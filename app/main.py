@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Depends, Response
+from fastapi import FastAPI, Depends, Request, Header
+from fastapi.responses import RedirectResponse
 from contextlib import asynccontextmanager
 from app.config.db import connect_to_mongo, disconnect_to_mongo
 from app.routes.auth import auth_rt
@@ -7,7 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.utilities.auth_utils import get_token, authenticate
 from app.config.settings import settings
 from app.routes.merchant import merchants_rt
+from fastapi.templating import Jinja2Templates
 
+templates = Jinja2Templates('app/templates')
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -25,13 +28,16 @@ app.include_router(auth_rt)
 app.include_router(merchants_rt)
 
 @app.get('/home')
-async def home():
-    return "Welcome to Home Page"
-
-@app.get('/dashboard')
-async def main(user = Depends(authenticate)):
+async def home(request: Request):
+    return templates.TemplateResponse(request=request, name='home.html',context={'msg': request.session.pop('Unauthorized',None)})
+@app.get('/')
+async def main(request: Request, user = Depends(authenticate)):
     # await create_tokens(user_info.get('email'),request)
-    return f"Welcome To Dashboard {user}"
+    return templates.TemplateResponse(
+        request=request,
+        name='dashboard.html',
+        context={'user': user}
+    )
     
 @app.get('/check')
 async def check(user_id: str):
@@ -39,3 +45,23 @@ async def check(user_id: str):
     print("Hello world")
     return token
 
+@app.exception_handler(404)
+async def not_found(request: Request, exc):
+    return templates.TemplateResponse(
+        request=request,
+        name='404_error.html',
+        status_code=404
+    )
+
+@app.exception_handler(400)
+async def some_error(request: Request, exc):
+    return RedirectResponse(
+        url=request.url_for('get_all_merchants')
+    )
+    
+@app.exception_handler(403)
+async def unauthorized_error(request: Request, exc):
+    request.session['Unauthorized'] = True
+    return RedirectResponse(
+        url=request.url_for('home')
+    )

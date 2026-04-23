@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <!-- <button><a href="http://127.0.0.1:8000/auth/google/login">Sign in with Google</a></button> -->
+    <button><a href="http://127.0.0.1:8000/auth/change-account">Change Account</a></button>
+    <button><a href="{{url_for('hard_logout')}}">Hard Logout</a></button>
+    <button><a href="{{url_for('soft_logout')}}">Soft Logout</a></button>
+    <br>
+    <br>
+    {% if accounts %}
+    {% for account in accounts %}
+    {{account['account_id']}}
+    {{account['account_name']}}
+    <button><a href="{{url_for('select_merchant')}}?merchant_id={{account['account_id']}}">Select Merchant</a></button>
+    <br><br>
+    {% endfor %}
+    <p><b>Selected Merchant Id: {{selected_merchant}}</b><p>
+    {% else %}
+    <b style="color:brown">No Merchants Found. Please Create atleast 1 merchant account..</b>
+    {% endif %}
+</body>
+</html>

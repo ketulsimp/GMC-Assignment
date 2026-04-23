@@ -63,7 +63,7 @@ async def google_callback(request: Request):
     logger.info(f"Login Successful for user")
     # headers = {'Set-Cookie': f'access_token=access_token'}
     await create_tokens(user_info.get('email'),request)
-    return RedirectResponse(url='/dashboard')
+    return RedirectResponse(url=str(request.base_url))
 
 @auth_rt.get('/hard-logout')
 async def hard_logout(request: Request,user = Depends(authenticate)):
@@ -93,7 +93,7 @@ async def soft_logout(request: Request):
         
 @auth_rt.get('/change-account')
 async def change_account(request: Request):
-    await delete_user_credentials(request)
+    # await delete_user_credentials(request)
     return RedirectResponse(url=request.url_for('google_login'))
 
     

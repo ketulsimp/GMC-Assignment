@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    {% if msg %}
+    <script>
+        alert("Unauthorized!! Please Login Again")
+    </script>
+    {% endif %}
+</head>
+<body>
+    <button><a href="http://127.0.0.1:8000/auth/google/login">Sign in with Google</a></button>
+    <h1>
+        WELCOME TO HOME PAGE
+    </h1>
+</body>
+</html>
