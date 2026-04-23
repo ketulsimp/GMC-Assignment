@@ -36,10 +36,18 @@ print(oauth.register)
 
 @auth_rt.get('/google/login')
 async def google_login(request: Request):
+    """
+    This route is called when sign in with google is initiated from the frontend.
+    """
+    
     return await oauth.google.authorize_redirect(request,redirect_uri=request.url_for('google_callback'))    
 
 @auth_rt.get('/google/callback')
 async def google_callback(request: Request):
+    """
+    This is the callback route configured to obtain tokens in exchange of code.
+    """
+    
     try:
         token = await oauth.google.authorize_access_token(request)
         if await request.is_disconnected():
@@ -67,6 +75,10 @@ async def google_callback(request: Request):
 
 @auth_rt.get('/hard-logout')
 async def hard_logout(request: Request,user = Depends(authenticate)):
+    """
+    Logouts user session and revokes google tokens too.
+    """
+    
     user = await delete_user_credentials(request)
     try:
         token = await fetch_token(user)
@@ -88,12 +100,20 @@ async def hard_logout(request: Request,user = Depends(authenticate)):
         
 @auth_rt.get('/soft-logout')
 async def soft_logout(request: Request):
+    """
+    Only logout user sessions.
+    """
+    
     user = await delete_user_credentials(request)
     return RedirectResponse(url=request.url_for('home'))
         
-@auth_rt.get('/change-account',user = Depends(authenticate))
-async def change_account(request: Request):
-    # await delete_user_credentials(request)
+@auth_rt.get('/change-account')
+async def change_account(request: Request,user = Depends(authenticate)):
+    """
+    Requires a account to be logged in to call this route.
+    Change google account; if process fails fallback to previously logged in account.
+    """
+    
     return RedirectResponse(url=request.url_for('google_login'))
 
     

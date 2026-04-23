@@ -29,11 +29,17 @@ app.include_router(merchants_rt)
 
 @app.get('/home')
 async def home(request: Request):
+    """
+    Home Page or Landing Page of the application
+    """
+    
     return templates.TemplateResponse(request=request, name='home.html',context={'msg': request.session.pop('msg',None)})
 
 @app.get('/')
 async def main(request: Request, user = Depends(authenticate)):
-    # await create_tokens(user_info.get('email'),request)
+    """
+    Dashboard Page of the application.
+    """
     return templates.TemplateResponse(
         request=request,
         name='dashboard.html',

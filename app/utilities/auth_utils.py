@@ -6,7 +6,6 @@ from app.config.settings import settings
 from app.log.logger import logger as logger
 import jwt
 from jwt.exceptions import ExpiredSignatureError
-from fastapi.responses import RedirectResponse
 from app.error.exceptions import TokenNotFoundError
 
 async def user_exists(email:str):

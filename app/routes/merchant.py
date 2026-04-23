@@ -13,6 +13,12 @@ templates = Jinja2Templates(directory='app/templates')
 
 @merchants_rt.get('/',response_class=HTMLResponse)
 async def get_all_accounts(request: Request):
+    """
+    Fetches the merchant account assosciated with the access token google account and displays them to the user.
+    Gracefully handled edge cases of no accounts assosciated with the user or updation of the merchant_accounts collection
+    selected_merchant_id field.
+    """
+    
     user_id = request.session.get('user')
     try:
         credentials = await get_credentials(user_id)
@@ -36,6 +42,14 @@ async def get_all_accounts(request: Request):
     
 @merchants_rt.get('/select-merchant')
 async def select_merchant(request: Request, merchant_id: int):
+    """
+    Selects the merchant_id and subsequently changes the merchant id in the database.
+    Key Considerations:
+        The selected merchant_id needs to be present the available merchant_id in the database which depends on 
+        the dynamically fetched merchant list so there is no possibiliy of mismatch or the selected merchant_id not existing
+        error.
+    """
+    
     user_id = request.session.get('user')
     await update_current_merchant(user_id,merchant_id)
     request.session['current_merchant'] = merchant_id
