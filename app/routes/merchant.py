@@ -7,6 +7,8 @@ from app.log.logger import logger
 from app.utilities.auth_utils import authenticate
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from app.error.exceptions import InternalServerError
+from app.utilities.auth_utils import delete_user_credentials
 
 merchants_rt = APIRouter(prefix='/merchants', dependencies=[Depends(authenticate)])
 templates = Jinja2Templates(directory='app/templates')
@@ -24,21 +26,26 @@ async def get_all_accounts(request: Request):
         credentials = await get_credentials(user_id)
     except TokenNotFoundError:
         logger.exception(f"Token error for user {user_id}")
-        raise HTTPException(status_code=500,detail='Token Error')
-    client = AccountsServiceAsyncClient(credentials=credentials)
-    req = ListAccountsRequest()
-    response = await client.list_accounts(request=req)
-    accounts = [decode_account(account) async for account in response]
-    context = {'accounts': accounts}
-    if accounts:
-        merchant_id = await store_merchant_details(user_id,accounts)
-        context['selected_merchant'] = merchant_id
-        request.session['current_merchant'] = merchant_id
-    return templates.TemplateResponse(
-        request=request,
-        name='merchant.html',
-        context=context
-    )
+        raise InternalServerError
+    try:
+        client = AccountsServiceAsyncClient(credentials=credentials)
+        req = ListAccountsRequest()
+        response = await client.list_accounts(request=req)
+        accounts = [decode_account(account) async for account in response]
+        context = {'accounts': accounts}
+        if accounts:
+            merchant_id = await store_merchant_details(user_id,accounts)
+            context['selected_merchant'] = merchant_id
+            request.session['current_merchant'] = merchant_id
+        return templates.TemplateResponse(
+            request=request,
+            name='merchant.html',
+            context=context
+        )
+    except Exception:
+        logger.exception("Request Error")
+        # await delete_user_credentials(request)
+        return RedirectResponse(url=request.url_for('main'))
     
 @merchants_rt.get('/select-merchant')
 async def select_merchant(request: Request, merchant_id: int):

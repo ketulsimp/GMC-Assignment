@@ -16,7 +16,7 @@ from app.config.settings import settings
 from fastapi.responses import RedirectResponse
 from app.log.logger import logger
 import httpx
-from app.error.exceptions import TokenNotFoundError
+from app.error.exceptions import TokenNotFoundError, InternalServerError
 
 
 oauth = OAuth()
@@ -55,10 +55,7 @@ async def google_callback(request: Request):
             raise OAuthError
     except (OAuthError):
         logger.error(msg="Google Authorization error...")
-        raise HTTPException(
-            status_code=500,
-            detail='Google Authentication Failed..'
-        )
+        raise InternalServerError
     # These are access and refresh tokens of google which means they are meant to be used for calling any other
     # google api service on behalf of the user. They are not meant for authorization or authentication.
     google_access_token,google_refresh_token,expires_at,user_info = await fetch_data(token)

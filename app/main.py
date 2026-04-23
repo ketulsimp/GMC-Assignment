@@ -9,6 +9,9 @@ from app.utilities.auth_utils import get_token, authenticate
 from app.config.settings import settings
 from app.routes.merchant import merchants_rt
 from fastapi.templating import Jinja2Templates
+from app.error.exceptions import global_error_handler
+from pymongo.errors import PyMongoError
+from app.error.exceptions import DatabaseError, InternalServerError
 
 templates = Jinja2Templates('app/templates')
 
@@ -19,7 +22,7 @@ async def lifespan(app: FastAPI):
     await disconnect_to_mongo()
     
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan,dependencies=[Depends(global_error_handler)])
 app.add_middleware(SessionMiddleware, secret_key=settings.session_secret_key)
 # app.add_middleware(CORSMiddleware,allow_origins=["http://127.0.0.1/5500"],allow_credentials=True,
 #     allow_methods=["*"],
@@ -32,20 +35,25 @@ async def home(request: Request):
     """
     Home Page or Landing Page of the application
     """
-    
+    # raise PyMongoError
     return templates.TemplateResponse(request=request, name='home.html',context={'msg': request.session.pop('msg',None)})
 
 @app.get('/')
-async def main(request: Request, user = Depends(authenticate)):
+async def main(request: Request, user = Depends(authenticate,scope='function')):
     """
     Dashboard Page of the application.
     """
+    
     return templates.TemplateResponse(
         request=request,
         name='dashboard.html',
         context={'user': user}
     )
-    
+
+@app.get('/testing')
+async def testing_global_db_error_handler():
+    raise PyMongoError
+
 @app.get('/check')
 async def check(user_id: str):
     token = await get_token(user_id)
@@ -59,12 +67,6 @@ async def not_found(request: Request, exc):
         name='404_error.html',
         status_code=404
     )
-
-@app.exception_handler(400)
-async def some_error(request: Request, exc):
-    return RedirectResponse(
-        url=request.url_for('get_all_merchants')
-    )
     
 @app.exception_handler(403)
 async def unauthorized_error(request: Request, exc):
@@ -73,7 +75,14 @@ async def unauthorized_error(request: Request, exc):
         url=request.url_for('home')
     )
     
-@app.exception_handler(500)
+@app.exception_handler(InternalServerError)
+async def unauthorized_error(request: Request, exc):
+    request.session['msg'] = "INTERNAL SERVER ERROR"
+    return RedirectResponse(
+        url=request.url_for('home')
+    )
+    
+@app.exception_handler(DatabaseError)
 async def unauthorized_error(request: Request, exc):
     request.session['msg'] = "INTERNAL SERVER ERROR"
     return RedirectResponse(

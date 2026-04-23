@@ -20,6 +20,7 @@ async def connect_to_mongo():
         logger.info("MongoDb Connection successful.")
     except Exception:
         logger.error("Connection to MongoDb Unsuccessfull.")
+        exit()
         
 async def disconnect_to_mongo():
     await _client.aclose()

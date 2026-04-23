@@ -7,6 +7,7 @@ from app.log.logger import logger as logger
 import jwt
 from jwt.exceptions import ExpiredSignatureError
 from app.error.exceptions import TokenNotFoundError
+from pymongo.errors import PyMongoError
 
 async def user_exists(email:str):
     db = get_mongo_db()
@@ -51,7 +52,6 @@ async def fetch_token(user_id):
 
 async def fetch_data(payload):
     access_token = payload.get('access_token')
-    print(access_token)
     refresh_token = payload.get('refresh_token')
     expires_at = payload.get('expires_in') + datetime.now().timestamp()
     user_info = {
