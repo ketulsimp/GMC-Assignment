@@ -91,7 +91,7 @@ async def soft_logout(request: Request):
     user = await delete_user_credentials(request)
     return RedirectResponse(url=request.url_for('home'))
         
-@auth_rt.get('/change-account')
+@auth_rt.get('/change-account',user = Depends(authenticate))
 async def change_account(request: Request):
     # await delete_user_credentials(request)
     return RedirectResponse(url=request.url_for('google_login'))
