@@ -32,7 +32,6 @@ def get_merchant_accounts():
         )
     except requests.exceptions.RequestException:
         logger.error("Network error calling Merchant API")
-        logger.error("Network error in Merchant API")
         return render_template("merchant_accounts.html", accounts=[], error="Network error in Merchant API", active_merchant_id=None)
 
     if response.status_code == 401:
