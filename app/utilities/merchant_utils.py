@@ -21,6 +21,7 @@ async def store_merchant_details(user_id: str,merchants: list):
     db = get_mongo_db()
     user_details = await db.users.find_one({'_id':ObjectId(user_id)})
     merchant_1 = merchants[0].get('account_id')
+    selected_merchant_still_exists = None
     if user_details is None:
         raise UserNotFoundError
     merchant_present = await db.merchant_accounts.find_one({'user_id':user_id})

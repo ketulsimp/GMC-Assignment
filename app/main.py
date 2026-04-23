@@ -29,7 +29,8 @@ app.include_router(merchants_rt)
 
 @app.get('/home')
 async def home(request: Request):
-    return templates.TemplateResponse(request=request, name='home.html',context={'msg': request.session.pop('Unauthorized',None)})
+    return templates.TemplateResponse(request=request, name='home.html',context={'msg': request.session.pop('msg',None)})
+
 @app.get('/')
 async def main(request: Request, user = Depends(authenticate)):
     # await create_tokens(user_info.get('email'),request)
@@ -61,7 +62,14 @@ async def some_error(request: Request, exc):
     
 @app.exception_handler(403)
 async def unauthorized_error(request: Request, exc):
-    request.session['Unauthorized'] = True
+    request.session['msg'] = "UNAUTHORIZED"
+    return RedirectResponse(
+        url=request.url_for('home')
+    )
+    
+@app.exception_handler(500)
+async def unauthorized_error(request: Request, exc):
+    request.session['msg'] = "INTERNAL SERVER ERROR"
     return RedirectResponse(
         url=request.url_for('home')
     )
