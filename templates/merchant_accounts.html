@@ -8,71 +8,56 @@
 
     <h2>Merchant Accounts</h2>
 
-    <a href="/merchant/change-account"><button>Change Google Account</button></a>
+    <a href="/merchant/change-account">
+        <button>Change Google Account</button>
+    </a>
 
     <br><br>
 
-    <div id="loading">Loading...</div>
+    {% if error %}
+        <p>Error: {{ error }}</p>
 
-    <div id="content" style="display:none;">
+    {% elif accounts %}
 
-        {% if error %}
-            <p>Error: {{ error }}</p>
-
-        {% elif accounts %}
-
-            <select id="merchant-select" onchange="showAccount(this.value)">
-                <option value="">-- Select a Merchant --</option>
+        <form action="/merchant/accounts/select" method="POST">
+            <select name="merchant_id" onchange="this.form.submit()">
                 {% for account in accounts %}
-                    <option value="{{ account.merchant_id }}">
+                    <option value="{{ account.merchant_id }}"
+                        {% if account.merchant_id == active_merchant_id %}selected{% endif %}>
                         {{ account.merchant_name }} (ID: {{ account.merchant_id }})
                     </option>
                 {% endfor %}
             </select>
+        </form>
 
-            <br><br>
+        <br>
 
-            <div id="account-detail"></div>
+        {% for account in accounts %}
+            {% if account.merchant_id == active_merchant_id %}
+                <table border="1" cellpadding="8" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Merchant ID</th>
+                            <th>Merchant Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ account.merchant_id }}</td>
+                            <td>{{ account.merchant_name }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            {% endif %}
+        {% endfor %}
 
-            <script>
-                var accounts = {{ accounts | tojson }};
-
-                function showAccount(merchant_id) {
-                    var detail = document.getElementById("account-detail");
-                    if (!merchant_id) {
-                        detail.innerHTML = "";
-                        return;
-                    }
-                    var account = accounts.find(function(a) { return a.merchant_id === merchant_id; });
-                    if (!account) {
-                        detail.innerHTML = "<p>Account not found.</p>";
-                        return;
-                    }
-                    detail.innerHTML =
-                        "<table border='1' cellpadding='8' cellspacing='0'>" +
-                        "<thead><tr><th>Merchant ID</th><th>Merchant Name</th><th>User ID</th><th>Google Account</th></tr></thead>" +
-                        "<tbody><tr>" +
-                        "<td>" + account.merchant_id + "</td>" +
-                        "<td>" + account.merchant_name + "</td>" +
-                        "<td>" + account.user_id + "</td>" +
-                        "<td>" + account.google_account_selected + "</td>" +
-                        "</tr></tbody></table>";
-                }
-            </script>
-
-        {% else %}
-            <p>No merchant accounts found.</p>
-        {% endif %}
-
-    </div>
+    {% else %}
+        <p>No merchant accounts found.</p>
+    {% endif %}
 
     <br>
-    <a href="/profile">Back to Profile</a>
 
-    <script>
-        document.getElementById("loading").style.display = "none";
-        document.getElementById("content").style.display = "block";
-    </script>
+    <a href="/profile">Back to Profile</a>
 
 </body>
 </html>

@@ -129,5 +129,9 @@ def callback():
     current_app.logger.info("Login Successful! Token Stored.")
 
     session["user_email"] = user["email"]
+    # db.merchant_accounts.update_many(
+    #     {"user_id": user_doc["_id"]},
+    #     {"$set": {"active_account": False}}
+    # )
 
     return redirect("/profile")
