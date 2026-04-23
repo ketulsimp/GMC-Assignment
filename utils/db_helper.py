@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import sessionmaker, declarative_base
 # from cryptography.fernet import Fernet
 
@@ -26,9 +26,22 @@ class Token(Base):
     refresh_token = Column(String)
     session_id = Column(String)
     expires_at = Column(DateTime)
-    user_email = Column(String,unique=True)
+    user_email = Column(String, ForeignKey("user.email"),unique=True)
     
+class merchant_account(Base):
+    __tablename__ = "merchant_account"
+    id = Column(Integer,primary_key=True)
+    accountName = Column(String)
+    accountId = Column(Integer)
+    email = Column(String,ForeignKey("user.email"),nullable=False,index=True)
     
+class selected_account_per_user(Base):
+    __tablename__ = "selected_account_per_user"
+    id = Column(Integer,primary_key=True)
+    email = Column(String,ForeignKey("user.email"),unique=True,nullable=False)
+    accountName = Column(String)
+    accountId = Column(Integer, ForeignKey("merchant_account.accountId"))
+        
 Base.metadata.create_all(bind=engine)
 
 def get_db():

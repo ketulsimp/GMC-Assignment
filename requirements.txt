@@ -1,3 +1,11 @@
+authlib
+fastapi
+httpx
+pydantic
+python-dotenv
+SQLAlchemy
+starlette
+uvicorn
 google-shopping-merchant-accounts
 google-shopping-merchant-datasources
 google-shopping-merchant-inventories
@@ -12,11 +20,6 @@ google-shopping-merchant-reviews
 google-auth-oauthlib
 google-auth
 googleapis-common-protos
-uvicorn 
-fastapi
-sqlalchemy
-httpx
-secrets
-datetime
-pydantic
-pydantic_settings
+Jinja2
+python-multipart
+itsdangerous
