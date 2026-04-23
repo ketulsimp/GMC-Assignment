@@ -7,7 +7,7 @@ from database.db import users
 import bcrypt
 import httpx
 from database.db import users,oauth_tokens
-from utils.jwt import create_access_token,verify_user
+from utils.jwt import create_access_token,verify_user,create_refresh_token
 from datetime import datetime,timedelta
 
 load_dotenv()
@@ -44,8 +44,10 @@ async def login_user(email:str=Form(),password:str=Form()):
     if not query or not bcrypt.checkpw(password.encode(),query['password'].encode()):
         raise HTTPException(401,detail='Invalid credentials')
     response=RedirectResponse(url='/welcome/manual')
-    token=create_access_token({'sub':email})
-    response.set_cookie('token',token,httponly=True)
+    access_token=create_access_token({'sub':email})
+    refresh_token=create_refresh_token({'sub':email})
+    await oauth_tokens.update_one({'email':email},{'$set':{'access_token':access_token,'refresh_token':refresh_token}},upsert=True)
+    response.set_cookie('token',access_token,httponly=True)
     return response
 
 
@@ -56,7 +58,7 @@ REDIRECT_URL=os.getenv('REDIRECT_URI')
 
 
 @router.get("/login/google")
-async def login():
+async def login():  
     url = f"https://accounts.google.com/o/oauth2/auth?client_id={GCI}&redirect_uri={REDIRECT_URL}&response_type=code&scope=openid email profile https://www.googleapis.com/auth/content&access_type=offline&prompt=consent"
     return RedirectResponse(url=url)
 
@@ -76,19 +78,15 @@ async def auth_callback(code: str):
         refresh_token=tokens['refresh_token']
         user_response=await client.get(USER_INFO_URI,headers={"Authorization":f"Bearer {access_token}"})
         user=user_response.json()
-        email=user['email']
+        email=user['email'] 
         name=user['name']
         query=await users.find_one({'email':email})
         if not query:
             await users.insert_one({'name':user['name'],'email':user['email'],'provider':'google'})
-        query2=await oauth_tokens.find_one({'email':email})
-        if not query2:
-            await oauth_tokens.insert_one({'email':email,'access_token':access_token,'refresh_token':refresh_token,'expiry':datetime.now()+timedelta(seconds=tokens['expires_in'])})
 
-        await oauth_tokens.update_one({'email':email},{"$set":{'access_token':access_token,'refresh_token':refresh_token,'expiry':datetime.now()+timedelta(seconds=tokens['expires_in'])}})
-        token=create_access_token({'sub':email})
+        await oauth_tokens.update_one({'email':email},{"$set":{'access_token':access_token,'refresh_token':refresh_token,'expiry':datetime.now()+timedelta(seconds=tokens['expires_in'])}},upsert=True)
         response=RedirectResponse(url='/welcome')
-        response.set_cookie('token',token,httponly=True)
+        response.set_cookie('token',access_token,httponly=True)
 
         return response
 

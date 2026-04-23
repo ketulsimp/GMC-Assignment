@@ -11,18 +11,29 @@
     <br>
     <br>
     <button><a href="/switch">Switch Account</a></button>
-    <button><a href="/merchant/accounts">SEE ACCOUNTS</a></button>
+    <!-- <button><a href="/merchant/accounts">SEE ACCOUNTS</a></button> -->
     <br>
     <br>
     <span>{{message}}</span>
-    <ul>
-        {% for account in responses %}
-        <strong>Acount Name: </strong>{{account.accountName}}
-        <br>
-        <strong>Account Id: </strong>{{account.accountId}}
-        <br>
-        <br>
-        {%endfor%}
-    </ul>
+    
+    <form method="POST" action="/merchant/accounts">
+        <label>Select Account:</label>
+        <select name="account_id">
+            <option value="">-- Select Account --</option>
+            {% for account in responses %}
+                <option value="{{ account.accountId }}">
+                    {{ account.accountName }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Show Details</button>
+    </form>
+
+    {% if selected_account %}
+        <h3>Account Details</h3>
+        <strong>Account Name:</strong> {{ selected_account.accountName }} <br>
+        <strong>Account Id:</strong> {{ selected_account.accountId }}
+    {% endif %}
 </body>
 </html>

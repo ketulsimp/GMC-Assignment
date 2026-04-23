@@ -1,10 +1,10 @@
 from jose import jwt
 import os
-from fastapi.security import HTTPBearer,HTTPAuthorizationCredentials
-from fastapi import Depends,HTTPException
+from fastapi.security import HTTPBearer
+from fastapi import HTTPException
 from config.settings import settings
 from dotenv import load_dotenv
-from database.db import users
+from database.db import users,oauth_tokens
 
 load_dotenv()
 
@@ -14,35 +14,27 @@ SECRET_KEY=os.environ['JWT_SECRET_KEY']
 
 def create_access_token(data:dict):
     to_encode=data.copy()
+    expiry=settings.ACCESS_TOKEN_EXPIRY_MINUTES
+    to_encode.update({'expiry':expiry})
     access_token=jwt.encode(to_encode,SECRET_KEY,algorithm=settings.ALGORITHM)
     return access_token
 
 def create_refresh_token(data:dict):
     to_encode=data.copy()
+    expiry=settings.REFRESH_TOKEN_EXPIRY_DAYS
+    to_encode.update({'expiry':expiry})
     refresh_token=jwt.encode(to_encode,SECRET_KEY,algorithm=settings.ALGORITHM)
     return refresh_token
 
-async def verify_user(credentials:HTTPAuthorizationCredentials=Depends(security)):
-    token=credentials
+async def verify_user(token:str):
     try:
-        payload=jwt.decode(token,SECRET_KEY,algorithms=[settings.ALGORITHM])
-        email=payload.get('sub')
+        query=await oauth_tokens.find_one({'access_token':token})
+        email=query['email']
         if email is None:
-            raise HTTPException(status_code=401,detail='Invalid token')
+            raise HTTPException(status_code=401, detail='Invalid token')
+        
     except Exception as e:
-        raise Exception(e)
-    user=await users.find_one({'email':email})
-    return user
+        raise HTTPException(status_code=401, detail='Invalid token')
 
-async def verify_manual_user(credentials:HTTPAuthorizationCredentials=Depends(security)):
-    token=credentials.credentials
-    print("MANUALTOKEN")
-    try:
-        payload=jwt.decode(token,SECRET_KEY,algorithms=[settings.ALGORITHM])
-        email=payload.get('sub')
-        if email is None:
-            raise HTTPException(status_code=401,detail='Invalid Token')
-    except Exception:
-        raise HTTPException(401, 'Invalid token')
-    user=await users.find_one({'email':email})
+    user = await users.find_one({'email': email})
     return user
