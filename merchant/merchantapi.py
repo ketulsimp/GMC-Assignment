@@ -134,19 +134,3 @@ def change_google_account():
     session.clear()
     return redirect("/auth/google/login")
 
-# @merchant_bp.route("/merchant/show/details")
-# def post_request():
-#     email = session.get("user_email")
-#     user_doc= db.users.find_one({"email":email})
-#     access_token = get_valid_token(user_doc["_id"])
-
-#     response= requests.get(
-#         "https://merchantapi.googleapis.com/accounts/v1/accounts",
-#         headers={
-#             "Authorization": f"Bearer {access_token}",
-#             "Content-Type": "application/json"
-#         },
-#         timeout=5
-#     )
-#     data= response.json()
-#     return data
