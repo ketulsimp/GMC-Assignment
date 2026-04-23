@@ -9,9 +9,9 @@ import httpx
 
 
 async def check_token_expiry(request:Request): 
-        logger.info('Entered middleware')
+        logger.info('Checking Token Expiry in middleware')
 
-        user = request.session['id']
+        user = request.session['user'].get('id')
         
         if user:
 

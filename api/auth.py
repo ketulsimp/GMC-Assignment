@@ -2,6 +2,7 @@ from fastapi import APIRouter, Request, Cookie
 from fastapi.responses import RedirectResponse
 from typing import Annotated
 from fastapi.templating import Jinja2Templates
+from authlib.integrations.base_client.errors import MismatchingStateError
 from dotenv import load_dotenv
 from db.users import insert_google_acc_to_db, insert_token_to_db, insert_user_to_db
 from utils.oauth import oauth
@@ -9,6 +10,7 @@ from schemas.auth import User, Google_Accounts, OAuthToken
 from datetime import datetime, timedelta
 import os
 from utils.logger import logger
+import httpx
 
 load_dotenv()
 
@@ -32,12 +34,21 @@ async def authorize(request: Request):
     try:
         logger.info('Started Google Login')        
         return await oauth.google.authorize_redirect(request, redirect_uri=os.environ['REDIRECT_URL'],access_type="offline",prompt="consent")
+  
+    except (httpx._exceptions.CloseError,httpx._exceptions.ConnectError, httpx._exceptions.CloseError) as e:
+        logger.warning('Httpx connection error in callback ',str(e))
+        return templates.TemplateResponse(
+           request=request, name='error.html',context={"msg":f"Httpx connection error in callback {str(e)}"} 
+        )
+  
+
 
     except Exception as e:
         import traceback
-        print("Error:", traceback.format_exc())  # Debugging step
         logger.warning(str(e))
-        return {"error": str(e)}
+        return templates.TemplateResponse(
+           request=request, name='error.html',context={"msg":traceback.format_exc()} 
+        )
 
     
 
@@ -59,24 +70,18 @@ async def callback(request:Request,state: str|None = None , code: str|None =None
         user = await oauth.google.parse_id_token(request, token)
         logger.info('User parsed. Starting DB Ops')
 
-        print(token)
 
         res = await insert_user_to_db(User(email=user.email,name=user.name))
-        print(res)
 
         res1 = await insert_google_acc_to_db(Google_Accounts(email=user.email,name=user.name,picture=user.picture))
 
         exp = datetime.now() + timedelta(seconds = token.get('expires_in'))
-        print(res1)
 
 
         res3 = await insert_token_to_db(OAuthToken(access_token=token.get('access_token'),refresh_token=token.get('refresh_token'),expiry=exp,user_id=str(res)))
 
-        print(res3)
         
-        
-        print(user)
-
+    
         usr = {
             'id':str(res),
             'name':user.name,
@@ -84,19 +89,41 @@ async def callback(request:Request,state: str|None = None , code: str|None =None
             'picture':user.picture
         }
 
-        request.session['id'] = str(res)
         request.session['user'] = usr
         request.session['google_acc_id'] = str(res1)
         request.session['state'] = state
         
         return RedirectResponse('/api/me')
+    
+
+    except MismatchingStateError as e:
+        logger.warning('Mismatching State Error ',str(e))
+        return templates.TemplateResponse(
+           request=request, name='error.html',context={"msg":f"Misnatching State Error {str(e)}"} 
+        )
+    
+    
+    except (httpx._exceptions.CloseError,httpx._exceptions.ConnectError, httpx._exceptions.CloseError, httpx._exceptions.ReadTimeout) as e:
+        logger.warning('Httpx connection error in callback ',str(e))
+        return templates.TemplateResponse(
+           request=request, name='error.html',context={"msg":f"Httpx connection error in callback {str(e)}"} 
+        )
+    
+    
+    except (httpx._exceptions.CloseError,httpx._exceptions.ConnectError, httpx._exceptions.CloseError) as e:
+        logger.warning('Httpx connection error in callback ',str(e))
+
+        return templates.TemplateResponse(
+           request=request, name='error.html',context={"msg":f"Httpx connection error in callback {str(e)}"} 
+        )
+    
 
     except Exception as e:
         import traceback
-        print("Error:", traceback.format_exc())  # Debugging step
-
         logger.warning(str(e))
+        return templates.TemplateResponse(
+           request=request, name='error.html',context={"msg":traceback.format_exc()} 
+        )
 
-        return {"error": str(e)}
 
 

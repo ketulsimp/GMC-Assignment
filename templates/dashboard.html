@@ -9,24 +9,34 @@
     <p>{{ user.name }}</p>
     <p>{{ user.email }}</p>
 
-    <!-- Merchant Dropdown -->
-    <form method="POST" action="">
+    <form method="POST" action="/api/me ">
         <label for="merchant">Select Merchant:</label>
-        <select name="merchant_id" id="merchant" onchange="this.form.submit()">
+        <select name="merchant_id" id="merchant"  onchange="form.submit()">
             {% for account in merchant.accounts %}
                 <option value="{{ account.accountId }}"
-                    {% if selected_merchant and merchant.accountId == selected_merchant.accountId %}
+                    {% if selectedMerchant and account.accountId == selectedMerchant.accountId %}
                         selected
                     {% endif %}
                 >
                     {{ account.name }}
                 </option>
             {% endfor %}
-        </select>   
+
+            
+        </select>
+        <br>
+        <br>
+        Name : {{ selectedMerchant.name }} <br>
+        Account Id : {{ selectedMerchant.accountId }} <br> 
+        Merchant Name : {{ selectedMerchant.merchant_name }}
+        
     </form>
 
 
 
     <a href="/api/logout">Logout</a>
+    <a href="/api/auth/google/login">Change Google Account </a>
+    
+
 </body>
 </html>
