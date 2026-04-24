@@ -1,0 +1,12 @@
+2026-04-24 17:52:10,477 - ERROR - 1 validation error for Products
+product_id
+  Value error, Value must be unique [type=value_error, input_value=17, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.13/v/value_error
+2026-04-24 17:52:10,480 - ERROR - 1 validation error for Products
+price
+  Input should be greater than 0 [type=greater_than, input_value=0, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.13/v/greater_than
+2026-04-24 17:55:03,745 - ERROR - Product 99 not found
+2026-04-24 17:55:48,563 - INFO - Product 17 found
+2026-04-24 17:58:39,641 - INFO - Product 17 found
+2026-04-24 17:58:52,849 - INFO - Product 1 found
