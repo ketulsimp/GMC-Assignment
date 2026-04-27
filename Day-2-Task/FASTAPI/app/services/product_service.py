@@ -9,4 +9,4 @@ async def fetch_products():
 
 async def fetch_product_by_id(id: str):
     _db = await get_db()
-    return await _db.products.find_one({'sku':id})
+    return await _db.products.find_one({'sku':id},{'_id':0})

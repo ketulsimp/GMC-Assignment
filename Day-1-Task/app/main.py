@@ -1,4 +1,4 @@
-from fastapi import FastAPI,Response, HTTPException
+from fastapi import FastAPI,Response, HTTPException,Depends
 from app.routes.product import product_rt
 from contextlib import asynccontextmanager
 from app.config.db import connect_to_mongo, disconnect_to_mongo
@@ -11,11 +11,12 @@ async def lifespan(app: FastAPI):
     await connect_to_mongo()
     yield
     await disconnect_to_mongo()
-    
+
 app = FastAPI(lifespan=lifespan)
 app.add_middleware(CorrelationIdMiddleware)
 
 app.include_router(product_rt)   
+
 
 
 @app.exception_handler(PyMongoError)
