@@ -15,17 +15,6 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 app.add_middleware(CorrelationIdMiddleware)
 
-# @app.middleware('http')
-# async def middleware(request: Request, call_next):
-#     web_logger.info("Request started.")
-#     # web_logger.info("This is info message",correlation_id=request.headers.get('correlation_id'))
-#     response = await call_next(request)
-#     web_logger.info("Request Ended.")
-#     return response
-
-# app.include_router(product_rt)   
-
-
 @app.exception_handler(PyMongoError)
 async def handling_pymongo_error(request, exc):
     web_logger.exception(f"Database Error...")

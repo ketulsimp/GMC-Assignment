@@ -1,0 +1,6 @@
+fastapi[standard]
+celery
+redis
+pymongo
+python-json-logger
+asgi-correlation-id

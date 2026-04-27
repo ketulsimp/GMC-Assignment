@@ -1,0 +1,4 @@
+celery
+redis
+pymongo
+python-json-logger
