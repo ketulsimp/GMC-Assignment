@@ -29,7 +29,7 @@ def batch_update(task_id: str):
 @routes.get('/products')
 def all_products():
     logging.info('getting all data from database')
-    data = collection.find().to_list()
+    data = list(collection.find())
     if not data:
         return 'no data to desplay pls add data first'
     for i in data:
@@ -39,8 +39,8 @@ def all_products():
 
 @routes.get('/products/{product_id}',response_model=Product)
 def one_product(product_id:int):
-    logging.info(f'fetching data for product_id {id}')
-    data = collection.find_one({'product_id':id})
+    logging.info(f'fetching data for product_id {product_id}')
+    data = collection.find_one({'product_id':product_id})
     if not data:
         return {'data not found'}
     out = {'product_id' : data['product_id'],
