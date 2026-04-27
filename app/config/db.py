@@ -1,6 +1,6 @@
 from pymongo import AsyncMongoClient, MongoClient
 from app.config.settings import settings
-from app.logs.logger import logger
+from app.logs.logger import web_logger
 
 class AsyncDbManager():
     client: AsyncMongoClient = None
@@ -21,9 +21,9 @@ async def connect_to_mongo():
         manager.client.admin.command('ping')
         async_manager.db = async_manager.client["task_2"]
         manager.db = manager.client["task_2"]
-        logger.info('DB Connection Successful')
+        web_logger.info('DB Connection Successful')
     except Exception as e:
-        logger.exception("Database Connection Unsuccessful.")
+        web_logger.exception("Database Connection Unsuccessful.")
         
         
 async def disconnect_to_mongo():

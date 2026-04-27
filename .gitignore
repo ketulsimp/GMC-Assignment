@@ -2,3 +2,6 @@
 __pycache__
 logs.log
 venv
+web_logs.log
+celery_logs.log
+_logs.log

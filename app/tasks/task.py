@@ -1,12 +1,12 @@
-from app.config.db import get_sync_db
-from typing import List
-from pymongo.errors import BulkWriteError
+from pymongo.errors import BulkWriteError, PyMongoError
 from pymongo import MongoClient
 import time
 from app.config.settings import settings
 from celery import Celery
 from app.config.settings import settings
 from celery.exceptions import Ignore
+# from app.logs.logger import logger
+from app.logs.logger import worker_logger
 
 celery = Celery(
     "tasks",
@@ -14,8 +14,11 @@ celery = Celery(
     backend=settings.backend_uri
 )
 
+celery
+
 @celery.task(bind=True)
 def batch_store_in_mongo(self,docs):
+    worker_logger.info(f"TaskID: {self.request.id.__str__()} started.")
     client = MongoClient(settings.mongo_uri)
     db = client["task_2"]
     batch_size = 100
@@ -34,8 +37,10 @@ def batch_store_in_mongo(self,docs):
                 
                 
     if faulty_products:
-        self.update_state(state='FAILURE',meta={'exc_type': 'Similar SKU or GSIN already Exist',
-                                         'exc_message': 'Some Fields are already existing', 'faulty_products': faulty_products})
+        self.update_state(state='FAILURE',meta={'exc_type': 'FAILURE INSERTING PRODUCTS',
+                                         'exc_message': 'Failed to insert these products because of similar skus, gsin or internal server error.', 'faulty_products': faulty_products})
+        worker_logger.error(f"TaskID: {self.request.id.__str__()} failed becuase of similar sku, gsin or internal server error.")
         raise Ignore()
     else:
         self.update_state(state='SUCCESS',meta={'current':'current'})
+        worker_logger.info(f"TaskID: {self.request.id.__str__()} executed successfully.")

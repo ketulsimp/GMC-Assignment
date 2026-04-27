@@ -21,7 +21,7 @@ async def get_product_by_id(id: Annotated[str,Path()]):
 
 
 @product_rt.post('/insert')
-async def insert_products(products: Annotated[List[Product],Body(max_length=1000)]):
+async def insert_products(products: Annotated[List[Product],Body(max_length=10000)]):
     result = check_similarity(products)
     if result is not None:
         return JSONResponse(
@@ -29,7 +29,6 @@ async def insert_products(products: Annotated[List[Product],Body(max_length=1000
             status_code=422
         )
     docs = serialize(products)
-    print(docs)
     task = batch_store_in_mongo.apply_async(args=[docs])
     return task.id
 

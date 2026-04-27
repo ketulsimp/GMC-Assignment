@@ -1,9 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI,Response, HTTPException
 from app.routes.product import product_rt
 from contextlib import asynccontextmanager
 from app.config.db import connect_to_mongo, disconnect_to_mongo
-from app.logs.logger import logger
 from asgi_correlation_id import CorrelationIdMiddleware
+from pymongo.errors import PyMongoError
+from app.logs.logger import web_logger
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -16,6 +17,13 @@ app.add_middleware(CorrelationIdMiddleware)
 
 app.include_router(product_rt)   
 
-@app.get('/')
-async def main():
-    logger.info("Main Route")
+
+@app.exception_handler(PyMongoError)
+async def handling_pymongo_error(request, exc):
+    web_logger.exception(f"Database Error...")
+    raise HTTPException(status_code=500, detail='Internal Server Error.')
+
+@app.exception_handler(500)
+async def handling_pymongo_error(request, exc):
+    web_logger.exception(f"Server Error...")
+    return Response()
