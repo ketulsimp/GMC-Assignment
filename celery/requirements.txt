@@ -1,0 +1,4 @@
+celery             5.6.3
+pymongo            4.17.0
+redis-cli          1.0.1
+dotenv             0.9.9
