@@ -1,0 +1,4 @@
+celery>=5.3.0
+redis>=5.0.0
+pymongo>=4.7.0
+python-dotenv>=1.0.0
