@@ -1,8 +1,8 @@
 from pydantic import BaseModel,Field,HttpUrl,field_validator,ValidationError,StringConstraints
 from typing import Optional,List,Annotated
 from decimal import Decimal
-from task2.models.db_model import products
-from task2.config.logging import logger
+from task2.fastapi_service.models.db_model import products
+from task2.fastapi_service.config.logging import logger
 
 nameString=Annotated[str,StringConstraints(max_length=100)]
 descString=Annotated[str,StringConstraints(max_length=500)]
@@ -21,8 +21,8 @@ class Products(BaseModel):
     def check_id(cls,id):
         query=products.find_one({'product_id':id})
         if query:
+            logger.error(f'Product id not unique. Product with id:{id} already exist')
             raise ValueError('Value must be unique')
-        logger.error(f'Product id not unique. Product with id:{id} already exist')
         return id
     
     @field_validator("price")

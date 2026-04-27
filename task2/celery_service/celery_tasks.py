@@ -1,7 +1,7 @@
 from celery import Celery
-from task2.models.db_model import products
+from task2.celery_service.models.db_model import products
 from pymongo.errors import DuplicateKeyError
-from task2.config.logging import logger
+from task2.celery_service.config.logging import logger
 import os
 from dotenv import load_dotenv
 
@@ -9,9 +9,8 @@ from dotenv import load_dotenv
 load_dotenv()
 celery = Celery("worker",broker=os.environ['REDIS_URI'],backend=os.environ['REDIS_URI'])
 
-@celery.task(bind=True)
+@celery.task(bind=True,name='worker.process_products')
 def process_products(self,products_data):
-    print(products_data)
     total_products = len(products_data)
     inserted_count=0
     failed=0

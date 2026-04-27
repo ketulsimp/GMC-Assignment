@@ -1,12 +1,62 @@
-2026-04-24 17:52:10,477 - ERROR - 1 validation error for Products
+2026-04-27 15:40:57,348 - ERROR - Product id not unique. Product with id:1 already exist
+2026-04-27 15:40:57,351 - ERROR - 1 validation error for Products
 product_id
-  Value error, Value must be unique [type=value_error, input_value=17, input_type=int]
+  Value error, Value must be unique [type=value_error, input_value=1, input_type=int]
     For further information visit https://errors.pydantic.dev/2.13/v/value_error
-2026-04-24 17:52:10,480 - ERROR - 1 validation error for Products
-price
-  Input should be greater than 0 [type=greater_than, input_value=0, input_type=int]
-    For further information visit https://errors.pydantic.dev/2.13/v/greater_than
-2026-04-24 17:55:03,745 - ERROR - Product 99 not found
-2026-04-24 17:55:48,563 - INFO - Product 17 found
-2026-04-24 17:58:39,641 - INFO - Product 17 found
-2026-04-24 17:58:52,849 - INFO - Product 1 found
+2026-04-27 15:40:57,353 - ERROR - Product id not unique. Product with id:2 already exist
+2026-04-27 15:40:57,354 - ERROR - 1 validation error for Products
+product_id
+  Value error, Value must be unique [type=value_error, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.13/v/value_error
+2026-04-27 15:40:57,355 - ERROR - Product id not unique. Product with id:1 already exist
+2026-04-27 15:40:57,355 - ERROR - 1 validation error for Products
+product_id
+  Value error, Value must be unique [type=value_error, input_value=1, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.13/v/value_error
+2026-04-27 15:41:43,712 - ERROR - Product id not unique. Product with id:1 already exist
+2026-04-27 15:41:43,713 - ERROR - 1 validation error for Products
+product_id
+  Value error, Value must be unique [type=value_error, input_value=1, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.13/v/value_error
+2026-04-27 15:41:43,735 - ERROR - Product id not unique. Product with id:1 already exist
+2026-04-27 15:41:43,735 - ERROR - 1 validation error for Products
+product_id
+  Value error, Value must be unique [type=value_error, input_value=1, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.13/v/value_error
+2026-04-27 15:45:03,897 - ERROR - Product id not unique. Product with id:1 already exist
+2026-04-27 15:45:03,910 - ERROR - 1 validation error for Products
+product_id
+  Value error, Value must be unique [type=value_error, input_value=1, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.13/v/value_error
+2026-04-27 15:45:03,917 - ERROR - Product id not unique. Product with id:3 already exist
+2026-04-27 15:45:03,917 - ERROR - 1 validation error for Products
+product_id
+  Value error, Value must be unique [type=value_error, input_value=3, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.13/v/value_error
+2026-04-27 15:45:03,919 - ERROR - Product id not unique. Product with id:1 already exist
+2026-04-27 15:45:03,919 - ERROR - 1 validation error for Products
+product_id
+  Value error, Value must be unique [type=value_error, input_value=1, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.13/v/value_error
+2026-04-27 15:45:26,801 - INFO - Product 1 found
+2026-04-27 15:46:39,856 - INFO - Product with id : 3 found
+2026-04-27 15:54:17,551 - ERROR - Product id not unique. Product with id:2 already exist
+2026-04-27 15:54:17,555 - ERROR - Product id not unique. Product with id:3 already exist
+2026-04-27 15:54:17,556 - ERROR - Product id not unique. Product with id:1 already exist
+2026-04-27 15:54:37,100 - ERROR - Product id not unique. Product with id:2 already exist
+2026-04-27 16:03:31,727 - ERROR - E11000 duplicate key error collection: productsapi.products index: sku_1 dup key: { sku: "ELEC-WXM-002" }, full error: {'index': 0, 'code': 11000, 'errmsg': 'E11000 duplicate key error collection: productsapi.products index: sku_1 dup key: { sku: "ELEC-WXM-002" }', 'keyPattern': {'sku': 1}, 'keyValue': {'sku': 'ELEC-WXM-002'}}
+2026-04-27 16:03:31,749 - ERROR - E11000 duplicate key error collection: productsapi.products index: sku_1 dup key: { sku: "HOME-SSB-045" }, full error: {'index': 0, 'code': 11000, 'errmsg': 'E11000 duplicate key error collection: productsapi.products index: sku_1 dup key: { sku: "HOME-SSB-045" }', 'keyPattern': {'sku': 1}, 'keyValue': {'sku': 'HOME-SSB-045'}}
+2026-04-27 16:03:31,757 - ERROR - E11000 duplicate key error collection: productsapi.products index: sku_1 dup key: { sku: "APP-TSH-991" }, full error: {'index': 0, 'code': 11000, 'errmsg': 'E11000 duplicate key error collection: productsapi.products index: sku_1 dup key: { sku: "APP-TSH-991" }', 'keyPattern': {'sku': 1}, 'keyValue': {'sku': 'APP-TSH-991'}}
+2026-04-27 16:04:18,969 - ERROR - Product 0 not found
+2026-04-27 16:14:43,782 - INFO - Product inserted {'product_id': 6, 'product_name': 'iPhone 17 pro', 'description': 'Soft, breathable 100% organic cotton tee in a classic crew neck style.', 'price': '752.00', 'category': 'Apparel', 'sku': 'APP-TSH-992', 'images': ['https://example.com/'], '_id': ObjectId('69ef3e1b277d495bb1092453')}
+INFO : 2026-04-27 17:21:16,209 - [ea1eecbb656f4adaa331f312bba44c64] - Product with id : 6 found
+ERROR : 2026-04-27 17:34:31,447 - [0dad311395e240beb1fd9a22fd50e9f9] - Product id not unique. Product with id:6 already exist
+ERROR : 2026-04-27 17:34:31,450 - [0dad311395e240beb1fd9a22fd50e9f9] - 1 validation error for Products
+product_id
+  Value error, Value must be unique [type=value_error, input_value=6, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.13/v/value_error
+2026-04-27 17:34:51,062 - INFO - Product inserted {'product_id': 7, 'product_name': 'iPhone 17 Pro', 'description': 'Soft, breathable 100% organic cotton tee in a classic crew neck style.', 'price': '752.0', 'category': 'Apparel', 'sku': 'APP-TSH-993', 'images': None, '_id': ObjectId('69ef50e379dc241eaa3f5840')}
+2026-04-27 17:35:22,650 - ERROR - E11000 duplicate key error collection: productsapi.products index: sku_1 dup key: { sku: "APP-TSH-993" }, full error: {'index': 0, 'code': 11000, 'errmsg': 'E11000 duplicate key error collection: productsapi.products index: sku_1 dup key: { sku: "APP-TSH-993" }', 'keyPattern': {'sku': 1}, 'keyValue': {'sku': 'APP-TSH-993'}}
+ERROR : 2026-04-27 17:36:20,846 - [None] - E11000 duplicate key error collection: productsapi.products index: sku_1 dup key: { sku: "APP-TSH-993" }, full error: {'index': 0, 'code': 11000, 'errmsg': 'E11000 duplicate key error collection: productsapi.products index: sku_1 dup key: { sku: "APP-TSH-993" }', 'keyPattern': {'sku': 1}, 'keyValue': {'sku': 'APP-TSH-993'}}
+ERROR : 2026-04-27 17:38:12,180 - E11000 duplicate key error collection: productsapi.products index: sku_1 dup key: { sku: "APP-TSH-993" }, full error: {'index': 0, 'code': 11000, 'errmsg': 'E11000 duplicate key error collection: productsapi.products index: sku_1 dup key: { sku: "APP-TSH-993" }', 'keyPattern': {'sku': 1}, 'keyValue': {'sku': 'APP-TSH-993'}}
+INFO : 2026-04-27 18:06:24,291 - [8a5e0903348d4f53b751e703daf05eba] - Product with id : 6 found
