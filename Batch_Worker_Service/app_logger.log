@@ -1,0 +1,4 @@
+[91m{"timestamp": "2026-04-28T12:23:22.269555", "service": "service", "level": "INFO", "message": "Received batch of 1 products", "correlation_id": "N/A"}[0m
+[91m{"timestamp": "2026-04-28T12:32:36.511144", "service": "worker-service", "level": "INFO", "message": "Received batch of 1 products", "correlation_id": "N/A"}[0m
+[91m{"timestamp": "2026-04-28T12:32:45.308950", "service": "worker-service", "level": "INFO", "message": "Received batch of 1 products", "correlation_id": "N/A"}[0m
+{"timestamp": "2026-04-28T12:32:45.315719", "service": "worker-service", "level": "ERROR", "message": "Duplicate SKU: WM-001 - product_id=1 sku=WM-001", "correlation_id": "N/A"}

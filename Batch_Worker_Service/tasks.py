@@ -1,10 +1,9 @@
-
 from celery_app import celery_app
 from pymongo.errors import DuplicateKeyError
 from database import products_collection_sync
-from core.logger import get_logger
+from workerlogger import get_logger
 
-logger = get_logger()
+logger = get_logger(service_name="worker-service")
 
 
 @celery_app.task(bind=True, name="tasks.process_products")

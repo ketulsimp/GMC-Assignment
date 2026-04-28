@@ -1,3 +1,4 @@
+--extra-index-url https://gitlab.com/api/v4/projects/81705392/packages/pypi/simple
 fastapi>=0.111.0
 uvicorn[standard]>=0.29.0
 motor>=3.4.0
@@ -6,3 +7,4 @@ celery>=5.3.0
 redis>=5.0.0
 pydantic>=2.7.0
 python-dotenv>=1.0.0
+workerlogger==0.2.0

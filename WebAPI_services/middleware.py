@@ -1,11 +1,11 @@
 from fastapi import Request
 from fastapi.responses import JSONResponse
 import uuid
-from core.logger import get_logger
+from workerlogger import get_logger
 from pymongo.errors import PyMongoError
 from redis.exceptions import RedisError
 
-logger = get_logger()
+logger = get_logger(service_name="web-api-service")
 
 
 async def logging_middleware(request: Request, call_next):
@@ -16,7 +16,7 @@ async def logging_middleware(request: Request, call_next):
 
     try:
         response = await call_next(request)
-        logger.info(f"Response: {response.status_code}", extra=extra)
+        logger.info(f"Response: {response.status_code}", extra=extra)   
         return response
 
     except PyMongoError as e:

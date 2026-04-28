@@ -6,8 +6,7 @@ from celery.result import AsyncResult
 from db import products_collection
 from dotenv import load_dotenv
 import os
-from core.logger import get_logger
-
+from workerlogger import get_logger
 load_dotenv()
 
 router = APIRouter()
@@ -16,14 +15,13 @@ celery_web = Celery(
     broker=os.getenv("REDIS_URL", "redis://localhost:6379/0"),
     backend=os.getenv("REDIS_URL", "redis://localhost:6379/0"),
 )
-logger= get_logger()
+logger= get_logger(service_name= "web-api-service")
 
 
 @router.post("/products/batch")
 async def add_products(products: List[Product]):
     if not products:
         raise HTTPException(status_code=400, detail="Empty list")
-    logger.info(f"Received batch of len{products} ")
     data = [p.model_dump(mode="json") for p in products]
     task = celery_web.send_task("tasks.process_products", args=[data])
     return {"task_id": task.id}
