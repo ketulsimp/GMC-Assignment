@@ -1,9 +1,4 @@
-uvicorn
-fastapi
-asgi_correlation_id 
 celery[redis]
 custome-logger --index-url https://gitlab.com/api/v4/projects/81713966/packages/pypi/simple
 pymongo
-starlette
-pydantic
 python-dotenv

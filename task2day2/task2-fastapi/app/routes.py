@@ -4,12 +4,14 @@ from celery.result import  AsyncResult
 from app.schema import Product
 from typing import List
 from db import collection
-from log import get_logger
+from custome_logger import get_logger
+import os
+from dotenv import load_dotenv
 
-
+load_dotenv()
 c_app = Celery('c_app',
-                broker='redis://localhost:6379/0',
-                backend='redis://localhost:6379/0'
+               broker=os.getenv("BROKER"),
+               backend=os.getenv('BACKEND')
                 )
 
 logger = get_logger()

@@ -1,7 +1,7 @@
 from celery_app import c_task
 from db import collection
 from pymongo.errors import DuplicateKeyError
-from log import get_logger
+from custome_logger import get_logger
 
 logging = get_logger()
 
