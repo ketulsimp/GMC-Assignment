@@ -15,6 +15,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 @app.middleware('http')
 async def middleware(request: Request,call_next):
+    print(request.url.__str__())
     web_logger.info("Request started")
     response = await call_next(request)
     web_logger.info("Request Ended")
@@ -29,8 +30,10 @@ async def handling_pymongo_error(request, exc):
     web_logger.exception(f"Database Error...")
     raise HTTPException(status_code=500, detail='Internal Server Error.')
 
-@app.exception_handler(500)
-async def handling_pymongo_error(request, exc):
-    web_logger.exception(f"Server Error...")
-    return Response()
+
+@app.exception_handler(Exception)
+async def handling_pymongo_error(request, exc: Exception):
+    print(request.url.__str__())
+    web_logger.exception(f"Exception")
+    raise HTTPException(status_code=500, detail='Internal Server Error.')
 

@@ -1,6 +1,6 @@
 from pymongo import AsyncMongoClient, MongoClient
 from app.config.settings import settings
-from app.logs.logger import web_logger
+from product_batch_logger.web_logger import web_logger
 
 class AsyncDbManager():
     client: AsyncMongoClient = None
