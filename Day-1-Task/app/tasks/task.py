@@ -24,7 +24,7 @@ def batch_store_in_mongo(self,docs):
     faulty_products = list()
     for i in range(0,len(docs),batch_size):
         self.update_state(state='PROGRESS',meta={'current':'current'})
-        time.sleep(10)
+        time.sleep(10) # for testing purposes only
         batch_docs = docs[i:i+batch_size]
         try:
             db.products.insert_many(batch_docs,ordered=False)

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Path, Body
+from fastapi import APIRouter, Path, Body, Request
 from typing import Annotated, List
 from app.models.product_model import Product
 from app.services.product_service import fetch_products, fetch_product_by_id
@@ -6,7 +6,8 @@ from app.utilities.product_utils import check_similarity, serialize
 from fastapi.responses import JSONResponse
 import json
 from app.config.celery_client import celery
-# from app.logs.logger import logger_decorator
+from product_batch_logger.web_logger import web_logger
+from asgi_correlation_id import correlation_id
 
 product_rt = APIRouter(prefix='/products')
 
@@ -16,10 +17,11 @@ async def get_all_products():
 
 @product_rt.get('/{id}')
 async def get_product_by_id(id: Annotated[str,Path()]):
-    return await fetch_product_by_id(id)
+    products = await fetch_product_by_id(id)
+    return products
 
 @product_rt.post('/insert')
-async def insert_products(products: Annotated[List[Product],Body(max_length=10000)]):
+async def insert_products(request: Request,  products: Annotated[List[Product],Body(max_length=10000)]):
     result = check_similarity(products)
     if result is not None:
         return JSONResponse(
@@ -27,7 +29,7 @@ async def insert_products(products: Annotated[List[Product],Body(max_length=1000
             status_code=422
         )
     docs = serialize(products)
-    task = celery.send_task('batch_store_in_mongo',args=[docs],queue='new-queue')
+    task = celery.send_task('batch_store_in_mongo',args=[docs,correlation_id.get()],queue='new-queue')
     return task.id
 
 @product_rt.get('/batch/status')

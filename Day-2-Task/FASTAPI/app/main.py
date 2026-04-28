@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from app.config.db import connect_to_mongo, disconnect_to_mongo
 from asgi_correlation_id import CorrelationIdMiddleware
 from pymongo.errors import PyMongoError
-from app.logs.logger import web_logger
+from product_batch_logger.web_logger import web_logger
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -13,7 +13,16 @@ async def lifespan(app: FastAPI):
     await disconnect_to_mongo()
     
 app = FastAPI(lifespan=lifespan)
+@app.middleware('http')
+async def middleware(request: Request,call_next):
+    web_logger.info("Request started")
+    response = await call_next(request)
+    web_logger.info("Request Ended")
+    return response
+
 app.add_middleware(CorrelationIdMiddleware)
+app.include_router(product_rt)
+
 
 @app.exception_handler(PyMongoError)
 async def handling_pymongo_error(request, exc):
@@ -24,3 +33,4 @@ async def handling_pymongo_error(request, exc):
 async def handling_pymongo_error(request, exc):
     web_logger.exception(f"Server Error...")
     return Response()
+

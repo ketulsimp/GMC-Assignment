@@ -1,4 +1,7 @@
+--extra-index-url https://gitlab.com/api/v4/projects/81714286/packages/pypi/simple
+
 celery
 redis
 pymongo
 python-json-logger
+product-batch-logger
