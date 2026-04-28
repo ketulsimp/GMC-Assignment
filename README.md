@@ -61,21 +61,6 @@ REDIS_BACKEND_URL
 REDIS_BROKER_URL
 ```
 
-## Environment Variables
-
-### Fastapi Env
-```bash
-MONGO_URL
-REDIS_BACKEND_URL
-REDIS_BROKER_URL
-```
-### Celery Env
-```bash
-MONGO_URL
-REDIS_BACKEND_URL
-REDIS_BROKER_URL
-```
-
 
 ## Sample Curl Requests 
 
