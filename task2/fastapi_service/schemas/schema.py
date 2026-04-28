@@ -1,8 +1,8 @@
-from pydantic import BaseModel,Field,HttpUrl,field_validator,ValidationError,StringConstraints
+from pydantic import BaseModel,Field,HttpUrl,field_validator,StringConstraints
 from typing import Optional,List,Annotated
 from decimal import Decimal
-from task2.fastapi_service.models.db_model import products
-from task2.fastapi_service.config.logging import logger
+from fastapi_service.models.db_model import products
+from custom_logs.custom_logger import logger
 
 nameString=Annotated[str,StringConstraints(max_length=100)]
 descString=Annotated[str,StringConstraints(max_length=500)]

@@ -1,14 +1,14 @@
 from fastapi import APIRouter, HTTPException
-from task2.fastapi_service.schemas.schema import Products
+from fastapi_service.schemas.schema import Products
 from typing import List
 from celery import Celery
 from celery.result import AsyncResult
-from task2.fastapi_service.models.db_model import products,db
+from fastapi_service.models.db_model import products,db
 from typing import List
-from task2.fastapi_service.config.logging import logger
+# from task2.fastapi_service.config.logging import logger
 import os
 from dotenv import load_dotenv
-
+from custom_logs.custom_logger import logger
 
 load_dotenv()
 
@@ -66,7 +66,7 @@ async def get_products():
 async def product_by_id(product_id: int):
     product = products.find_one({"product_id": product_id},{"_id":0})
     if not product:
-        logger.error(f"Product with id : {product_id} found")
+        logger.error(f"Product with id : {product_id} not found")
         raise HTTPException(status_code=404, detail="Not found")
     logger.info(f"Product with id : {product_id} found")
     return product

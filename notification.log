@@ -60,3 +60,59 @@ product_id
 ERROR : 2026-04-27 17:36:20,846 - [None] - E11000 duplicate key error collection: productsapi.products index: sku_1 dup key: { sku: "APP-TSH-993" }, full error: {'index': 0, 'code': 11000, 'errmsg': 'E11000 duplicate key error collection: productsapi.products index: sku_1 dup key: { sku: "APP-TSH-993" }', 'keyPattern': {'sku': 1}, 'keyValue': {'sku': 'APP-TSH-993'}}
 ERROR : 2026-04-27 17:38:12,180 - E11000 duplicate key error collection: productsapi.products index: sku_1 dup key: { sku: "APP-TSH-993" }, full error: {'index': 0, 'code': 11000, 'errmsg': 'E11000 duplicate key error collection: productsapi.products index: sku_1 dup key: { sku: "APP-TSH-993" }', 'keyPattern': {'sku': 1}, 'keyValue': {'sku': 'APP-TSH-993'}}
 INFO : 2026-04-27 18:06:24,291 - [8a5e0903348d4f53b751e703daf05eba] - Product with id : 6 found
+ERROR : 2026-04-28 16:08:03,236 - [86d95ed1f0984393ad1c1ea0f2fd2652] - Product id not unique. Product with id:1 already exist
+ERROR : 2026-04-28 16:08:03,236 - [86d95ed1f0984393ad1c1ea0f2fd2652] - Product id not unique. Product with id:1 already exist
+ERROR : 2026-04-28 16:08:03,246 - [86d95ed1f0984393ad1c1ea0f2fd2652] - 1 validation error for Products
+product_id
+  Value error, Value must be unique [type=value_error, input_value=1, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.13/v/value_error
+ERROR : 2026-04-28 16:08:03,246 - [86d95ed1f0984393ad1c1ea0f2fd2652] - 1 validation error for Products
+product_id
+  Value error, Value must be unique [type=value_error, input_value=1, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.13/v/value_error
+ERROR : 2026-04-28 16:08:38,494 - [7c43649dc3754919bff461b563452acd] - Product with id : 4 found
+ERROR : 2026-04-28 16:08:38,494 - [7c43649dc3754919bff461b563452acd] - Product with id : 4 found
+ERROR : 2026-04-28 16:09:10,839 - [62c4208f806341d5add9d8cacd5969e1] - Product with id : 4 found
+ERROR : 2026-04-28 16:09:10,839 - [62c4208f806341d5add9d8cacd5969e1] - Product with id : 4 found
+INFO : 2026-04-28 16:09:24,523 - [b27b1770ca22465fbb213a184346503f] - Product with id : 6 found
+INFO : 2026-04-28 16:09:24,523 - [b27b1770ca22465fbb213a184346503f] - Product with id : 6 found
+ERROR : 2026-04-28 16:42:56,585 - [None] - E11000 duplicate key error collection: productsapi.products index: sku_1 dup key: { sku: "ELEC-WXM-002" }, full error: {'index': 0, 'code': 11000, 'errmsg': 'E11000 duplicate key error collection: productsapi.products index: sku_1 dup key: { sku: "ELEC-WXM-002" }', 'keyPattern': {'sku': 1}, 'keyValue': {'sku': 'ELEC-WXM-002'}}
+INFO : 2026-04-28 16:43:40,362 - [None] - Product inserted {'product_id': 4, 'product_name': 'Ergonomic Wireless Mouse', 'description': 'A sleek, 2.4GHz wireless mouse with adjustable DPI and a contoured gri…', 'price': '25.99', 'category': 'Electronics', 'sku': 'ELEC-WXM-003', 'images': ['https://example.com/'], '_id': ObjectId('69f0966407e5900012edc323')}
+INFO : 2026-04-28 16:43:55,703 - [None] - Product with id : 4 found
+INFO : 2026-04-28 16:43:55,703 - [None] - Product with id : 4 found
+INFO : 2026-04-28 16:51:10,874 - [None] - Product with id : 4 found
+INFO : 2026-04-28 16:51:10,874 - [None] - Product with id : 4 found
+INFO : 2026-04-28 16:59:15,259 - [None] - Product with id : 4 found
+INFO : 2026-04-28 16:59:15,259 - [None] - Product with id : 4 found
+INFO : 2026-04-28 16:59:38,578 - [7c9a6e7a1aa84e59b9e616e4085019cc] - Product with id : 4 found
+INFO : 2026-04-28 16:59:38,578 - [7c9a6e7a1aa84e59b9e616e4085019cc] - Product with id : 4 found
+INFO : 2026-04-28 17:04:29,290 - [1d72167171cb4384b5093d16e230927b] - Product with id : 4 found
+INFO : 2026-04-28 17:04:29,290 - [1d72167171cb4384b5093d16e230927b] - Product with id : 4 found
+INFO : 2026-04-28 17:15:32,420 - [82e0e3f3d43d4e83956e2526a05aabd6] - Product with id : 7 found
+INFO : 2026-04-28 17:15:32,420 - [82e0e3f3d43d4e83956e2526a05aabd6] - Product with id : 7 found
+INFO : 2026-04-28 17:18:53,404 - [14a7250471b249e9b317036188221a71] - Product with id : 7 found
+INFO : 2026-04-28 17:18:53,404 - [14a7250471b249e9b317036188221a71] - Product with id : 7 found
+INFO : 2026-04-28 17:19:37,589 - [829e69e518ee4e13b96cadb1729834a2] - Product with id : 1 found
+INFO : 2026-04-28 17:19:37,589 - [829e69e518ee4e13b96cadb1729834a2] - Product with id : 1 found
+INFO : 2026-04-28 17:20:38,745 - [dcda52fffb20496db10ef48da0da94db] - Product with id : 1 found
+INFO : 2026-04-28 17:20:38,745 - [dcda52fffb20496db10ef48da0da94db] - Product with id : 1 found
+INFO : 2026-04-28 17:22:58,974 - [25f06a84516b489d87b5d8f261dbe45f] - Product with id : 1 found
+INFO : 2026-04-28 17:22:58,974 - [25f06a84516b489d87b5d8f261dbe45f] - Product with id : 1 found
+ERROR : 2026-04-28 17:23:23,452 - [9e492802a91a4945802fbe63b74d64df] - Product with id : 5 not found
+ERROR : 2026-04-28 17:23:23,452 - [9e492802a91a4945802fbe63b74d64df] - Product with id : 5 not found
+ERROR : 2026-04-28 17:32:21,355 - [3835088c8b02496c8ba97365985ee10d] - Product with id : 5 not found
+ERROR : 2026-04-28 17:32:21,355 - [3835088c8b02496c8ba97365985ee10d] - Product with id : 5 not found
+ERROR : 2026-04-28 17:37:17,397 - [99e822e8d2cf41a68ef15d3ab5cb04a7] - Product with id : 5 not found
+ERROR : 2026-04-28 17:37:17,397 - [99e822e8d2cf41a68ef15d3ab5cb04a7] - Product with id : 5 not found
+INFO : 2026-04-28 17:38:11,534 - [ec86e8463f234f87bffc800172f9f19e] - Product with id : 1 found
+INFO : 2026-04-28 17:38:11,534 - [ec86e8463f234f87bffc800172f9f19e] - Product with id : 1 found
+INFO : 2026-04-28 17:43:08,693 - [2708c78775f147d6951fb0e03bbfa080] - Product with id : 2 found
+INFO : 2026-04-28 17:44:38,863 - [32365d50f6b3459e80b2d783cf3ecded] - Product with id : 2 found
+INFO : 2026-04-28 17:44:38,863 - Correlation_id : [32365d50f6b3459e80b2d783cf3ecded] - Product with id : 2 found
+INFO : 2026-04-28 17:45:33,084 - [8d5bcd041cfe437fb4e0d3f9defe0856] - Product with id : 4 found
+INFO : 2026-04-28 17:45:33,084 - Correlation_id : [8d5bcd041cfe437fb4e0d3f9defe0856] - Product with id : 4 found
+INFO : 2026-04-28 17:45:49,593 - [d2c6b2e0dcc3497cbb01edb7873956cd] - Product with id : 4 found
+INFO : 2026-04-28 17:45:49,593 - Correlation_id : [d2c6b2e0dcc3497cbb01edb7873956cd] - Product with id : 4 found
+INFO : 2026-04-28 17:45:55,767 - [77046a7f07c8488f95e31ea7294f0c8e] - Product with id : 6 found
+INFO : 2026-04-28 17:45:55,767 - Correlation_id : [77046a7f07c8488f95e31ea7294f0c8e] - Product with id : 6 found
+INFO : 2026-04-28 17:47:57,256 - Correlation_id : [f9091ad5ad6e4c73ab1f6f4789cde201] - Product with id : 1 found

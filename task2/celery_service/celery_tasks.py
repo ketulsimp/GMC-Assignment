@@ -1,10 +1,9 @@
 from celery import Celery
-from task2.celery_service.models.db_model import products
+from celery_service.models.db_model import products
 from pymongo.errors import DuplicateKeyError
-from task2.celery_service.config.logging import logger
 import os
 from dotenv import load_dotenv
-
+from custom_logs.custom_logger import logger
 
 load_dotenv()
 celery = Celery("worker",broker=os.environ['REDIS_URI'],backend=os.environ['REDIS_URI'])

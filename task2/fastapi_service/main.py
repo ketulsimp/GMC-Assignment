@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from task2.fastapi_service.routes.router import router
+from fastapi_service.routes.router import router
 from asgi_correlation_id import CorrelationIdMiddleware
 
 app=FastAPI()

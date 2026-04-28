@@ -1,0 +1,8 @@
+--extra-index-url https://gitlab.com/api/v4/projects/81713320/packages/pypi/simple
+
+fastapi
+uvicorn
+pymongo
+celery[redis]
+custom_logs
+dotenv
