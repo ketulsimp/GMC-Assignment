@@ -44,7 +44,7 @@ Split the monolith into two independently runnable services: Web API (HTTP traff
 `git clone -b raj-task-2 https://github.com/ketulsimp/GMC-Assignment.git`
 
 3. Run the commands \
-`cd Task_2/Day-2-Task/FASTAPI` 
+`cd GMC-Assignment/Day-2-Task/FASTAPI` 
 
 4. Create a virtual Environment and Run the following commands
 ``` 
@@ -63,7 +63,7 @@ Split the monolith into two independently runnable services: Web API (HTTP traff
 6. Start the fastapi server \
 `uvicorn app.main:app --reload`
 
-7. Open another terminal and navigate to the Task_2 folder
+7. Open another terminal and navigate to the GMC-Assignment folder
 
 8. Run the command \
 `cd Day-2-Task/CELERY/`
