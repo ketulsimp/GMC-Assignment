@@ -4,13 +4,15 @@ from celery.result import  AsyncResult
 from app.schema import Product
 from typing import List
 from db import collection
-from log import logger
+from log import get_logger
 
 
 c_app = Celery('c_app',
                 broker='redis://localhost:6379/0',
                 backend='redis://localhost:6379/0'
                 )
+
+logger = get_logger()
 
 routes = APIRouter()
 
@@ -57,9 +59,8 @@ def one_product(req:Request,product_id:int):
 
 @routes.post('/products/batch')
 def products_regester(req:Request,data : List[Product]):
-    # task = store_all_product.delay([item.dict() for item in data])
-    task = c_app.send_task('celery_task.store_all_product',kwargs={'data':[item.dict() for item in data]})
-    # task = store_all_product.apply_async(kwargs={'data':[item.dict() for item in data]})
+    correlation_id = req.state.correlation_id
+    task = c_app.send_task('celery_task.store_all_product',kwargs={'data':[item.dict() for item in data],'correlation_id':correlation_id})
     correlation_id = req.state.correlation_id
     logger.info(f'for storing new data, task send to id {task.id}',extra={"correlation_id": correlation_id})
     return {"task_id": task.id}

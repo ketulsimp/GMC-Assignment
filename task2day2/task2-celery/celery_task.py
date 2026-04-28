@@ -1,17 +1,18 @@
 from celery_app import c_task
 from db import collection
 from pymongo.errors import DuplicateKeyError
+from log import get_logger
 
+logging = get_logger()
 
 
 @c_task.task(bind=True)
-def store_all_product(self, data: list):
+def store_all_product(self, data: list,correlation_id=None):
     total = len(data)
     inserted = 0 
     results = []
 
-    with open('logs.log','a') as f:
-        f.write('\nadding data to database')
+    logging.info('adding data to database',extra={"correlation_id": correlation_id})
     for i, item in enumerate(data):
         try:
             collection.insert_one(item)
@@ -26,8 +27,7 @@ def store_all_product(self, data: list):
             duplicate_field = list(key_pattern.keys())[0] 
             duplicate_value = list(key_value.values())[0]
             
-            with open('logs.log','a') as f:
-                f.write(f'\ndata duplicate at {duplicate_field} - {duplicate_value}')
+            logging.warn(f'data duplicate at {duplicate_field} - {duplicate_value}',extra={'correlation_id':correlation_id})
 
             results.append({
                 "product_id": item["product_id"],
@@ -38,8 +38,7 @@ def store_all_product(self, data: list):
             })
 
         except Exception as e:
-            with open('logs.log','a') as f:
-                f.write('\nerror ',e)
+            logging.info('error in adding data',extra={'correlation_id':correlation_id})
             results.append({
                 "product_id": item["product_id"],
                 "status": "failed",
@@ -55,8 +54,7 @@ def store_all_product(self, data: list):
             }
         )
         
-    with open('logs.log','a') as f:
-                f.write('\ndata insertion performed successfully')
+    logging.info('data inserted successfullly',extra={'correlation_id':correlation_id})
 
     return {
         "status": "completed",
