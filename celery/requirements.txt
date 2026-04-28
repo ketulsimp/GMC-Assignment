@@ -1,4 +1,6 @@
-celery             5.6.3
-pymongo            4.17.0
-redis-cli          1.0.1
-dotenv             0.9.9
+--extra-index-url https://gitlab.com/api/v4/projects/81707675/packages/pypi/simple
+
+celery[redis]
+dotenv
+pymongo
+logger==0.0.1

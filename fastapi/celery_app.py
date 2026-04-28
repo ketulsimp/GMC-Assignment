@@ -18,5 +18,3 @@ app = Celery(
 
 app.conf.task_default_queue = "product_queue"
 app.conf.task_default_routing_key = "product_queue"
-
-

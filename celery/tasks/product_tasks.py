@@ -2,7 +2,10 @@ from celery_app import app
 from db.products import insert_product
 from pymongo.errors import DuplicateKeyError
 import asyncio, time
-from logger import logger
+from logger.main import mylogger
+
+logger = mylogger()
+
 
 @app.task(name="insert_products",bind=True,default_retry_delay = 3,acks_late=True)
 def insert_batch_products(self,products: list[dict],errors:list = [], inserted_ids:list = [], rejected_ids=[]):
@@ -14,7 +17,7 @@ def insert_batch_products(self,products: list[dict],errors:list = [], inserted_i
                 meta={'current': product.get('id'), 'total': len(products), 'status': 'Inserting Product'}
             )
             logger.info({"message":f"Task in progress current product ID : {product.get('id')} / total {len(products)}"})
-            res = insert_product(product=product)
+            res = insert_product(product=product,logger=logger)
             inserted_ids.append(product.get('id'))
         return {"Total Products Inserted":len(inserted_ids),"Errors in Inserting ":errors, "Inserted Product IDs":inserted_ids,"Rejected Product IDs":rejected_ids}
     

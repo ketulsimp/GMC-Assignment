@@ -20,7 +20,7 @@ class NoProductFoundInDB(Exception):
 async def no_product_found_in_db_exception_handler(req:Request,exc: NoProductFound):
     return JSONResponse(
         status_code=404,
-        content={"message": f"No Product with id {exc.id} Found"},
+        content={"message": f"No Products Found in DB"},
     )
 
 

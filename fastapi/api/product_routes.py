@@ -4,7 +4,6 @@ from db.products import get_products, get_product_with_id
 from celery.result import AsyncResult
 from utils.error_handler import NoProductFound, NoProductFoundInDB
 from celery_app import app
-
 product = APIRouter(prefix='/products')
 
 

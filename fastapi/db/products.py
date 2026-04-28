@@ -10,5 +10,3 @@ def get_product_with_id(id:int):
     res = db.products.find_one({'id':id},{'_id':0})
     return res
 
-
-

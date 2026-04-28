@@ -1,5 +1,7 @@
-celery               5.6.3
-fastapi[standard]    0.136.1
-pymongo              4.17.0
-redis-cli            1.0.1
-asgi-correlation-id  0.1.6
+--extra-index-url  https://gitlab.com/api/v4/projects/81707675/packages/pypi/simple
+
+fastapi
+uvicorn
+dotenv
+celery[redis]
+logger==0.0.1

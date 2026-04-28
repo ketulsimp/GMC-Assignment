@@ -2,12 +2,8 @@ from celery import Celery
 from kombu import Queue
 import os
 from dotenv import load_dotenv
-import json_log_formatter
 
 load_dotenv()
-
-formatter = json_log_formatter.JSONFormatter()
-
 
 app = Celery(
         'app',

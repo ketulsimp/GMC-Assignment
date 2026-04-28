@@ -1,7 +1,10 @@
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.concurrency import iterate_in_threadpool
 from fastapi import Request
-from utils.logger import logger
+from logger.main import mylogger 
+logger = mylogger()
+
+
 
 class LoggingMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
