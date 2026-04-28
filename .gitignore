@@ -2,3 +2,4 @@ __pycache__/
 .env
 app.log
 celerytask.log
+logs.log

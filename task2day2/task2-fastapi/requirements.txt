@@ -1,0 +1,5 @@
+uvicorn
+fastapi
+asgi_correlation_id 
+celery
+logging
