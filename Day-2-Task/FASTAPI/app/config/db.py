@@ -35,3 +35,8 @@ async def get_db():
 
 def get_sync_db():
     return manager.db
+
+
+async def create_index():
+    await async_manager.db["products"].create_index("gsin",unique=True)
+    await async_manager.db["products"].create_index("sku",unique=True)
